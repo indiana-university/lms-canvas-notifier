@@ -1,0 +1,188 @@
+package edu.iu.uits.lms.canvasnotifier.controller;
+
+import com.google.gson.Gson;
+import com.opencsv.CSVReader;
+import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
+import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
+import edu.iu.uits.lms.canvasnotifier.model.Job;
+import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
+import edu.iu.uits.lms.canvasnotifier.model.User;
+import edu.iu.uits.lms.canvasnotifier.model.form.CanvasNotifierFormModel;
+import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
+import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
+import edu.iu.uits.lms.lti.LTIConstants;
+
+import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
+import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/app")
+@Slf4j
+public class CanvasNotifierController extends LtiAuthenticationTokenAwareController {
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private CanvasNotifierMessageSender canvasNotifierMessageSender;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @RequestMapping(value = "/accessDenied")
+    public String accessDenied() {
+        return "accessDenied";
+    }
+
+    @RequestMapping("/main")
+    @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
+    public String main(Model model, CanvasNotifierFormModel canvasNotifierFormModel) {
+        List<User> userList = new ArrayList<>();
+
+        User pickOptionDummyUser = new User();
+        pickOptionDummyUser.setId(-1L);
+        pickOptionDummyUser.setDisplayName("Choose a username...");
+
+        userList.add(pickOptionDummyUser);
+        userList.addAll(userRepository.findAllAuthorizedSenders());
+
+        userList.sort(Comparator.comparing(User::getId));
+
+        canvasNotifierFormModel.setUserList(userList);
+
+        model.addAttribute("canvasNotifierFormModel", canvasNotifierFormModel);
+
+        return "main";
+    }
+
+    @RequestMapping(value = "/preview", method = RequestMethod.POST)
+    @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
+    public String preview(Model model, @ModelAttribute CanvasNotifierFormModel canvasNotifierFormModel) throws Exception {
+        canvasNotifierFormModel.setGlobalErrorsList(new ArrayList<String>());
+        canvasNotifierFormModel.setFieldErrorsMap(new HashMap<String, Boolean>());
+        canvasNotifierFormModel.setSuccessfullySubmitted(false);
+        canvasNotifierFormModel.setCnAttachmentText(null);
+
+        if (canvasNotifierFormModel.getSelectedSenderCanvasId() == null ||
+                canvasNotifierFormModel.getSelectedSenderCanvasId().isEmpty() || canvasNotifierFormModel.getSelectedSenderCanvasId().equals("-1")) {
+            canvasNotifierFormModel.getFieldErrorsMap().put("sender", true);
+            return main(model, canvasNotifierFormModel);
+        }
+
+        if (canvasNotifierFormModel.getSubject() == null || canvasNotifierFormModel.getSubject().isEmpty()) {
+            canvasNotifierFormModel.getFieldErrorsMap().put("subject", true);
+        }
+
+        if (canvasNotifierFormModel.getBody() == null || canvasNotifierFormModel.getBody().isEmpty()) {
+            canvasNotifierFormModel.getFieldErrorsMap().put("body", true);
+        }
+
+        canvasNotifierFormModel.setSelectedSenderDisplayName(userRepository.findByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId()).getDisplayName());
+
+        MultipartFile cnAttachment = canvasNotifierFormModel.getCnAttachment();
+
+        if (cnAttachment.isEmpty()) {
+            canvasNotifierFormModel.getFieldErrorsMap().put("attachment", true);
+        } else {
+            CSVReader csvReader = new CSVReader(new InputStreamReader(cnAttachment.getInputStream()));
+            List<String[]> rawContents = csvReader.readAll();
+
+            if (rawContents == null || rawContents.isEmpty()) {
+                canvasNotifierFormModel.getGlobalErrorsList().add("No CSV content found");
+            }
+
+            canvasNotifierFormModel.setCnAttachmentText(new Gson().toJson(rawContents));
+
+
+            // check for duplicate header column names
+            Map<String, String> duplicateHeaderNameValue = new HashMap<>();
+            String[] headerLine = rawContents.get(0);
+
+            for (String header : headerLine) {
+                if (duplicateHeaderNameValue.containsKey(header.toLowerCase())) {
+                    canvasNotifierFormModel.getGlobalErrorsList().add("Duplicate header column named " + header + " found");
+                } else {
+                    duplicateHeaderNameValue.put(header.toLowerCase(), header.toLowerCase());
+                }
+            }
+
+            // make sure the csv has a username column
+            Map<String, String> lineMappedContent = CanvasNotifierUtils.createCsvLineDataMap(rawContents, 1);
+
+            if (lineMappedContent == null || ! lineMappedContent.containsKey(CanvasNotifierUtils.USERNAME_COLUMN_NAME)) {
+                canvasNotifierFormModel.getGlobalErrorsList().add("No username column defined in csv file");
+            } else {
+                canvasNotifierFormModel.setPreviewBody(CanvasNotifierUtils.getVariableReplacedBody(lineMappedContent, canvasNotifierFormModel.getBody()));
+            }
+        }
+
+        if (! canvasNotifierFormModel.getGlobalErrorsList().isEmpty() || ! canvasNotifierFormModel.getFieldErrorsMap().isEmpty()) {
+            return main(model, canvasNotifierFormModel);
+        } else {
+            return "preview";
+        }
+    }
+
+    @RequestMapping(value = "/backorsend", method = RequestMethod.POST)
+    @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
+    public String back(Model model, @ModelAttribute CanvasNotifierFormModel canvasNotifierFormModel, @RequestParam String action) {
+        canvasNotifierFormModel.setSuccessfullySubmitted(false);
+
+        if ("send".equals(action)) {
+            return send(model, canvasNotifierFormModel);
+        } else {
+            return main(model, canvasNotifierFormModel);
+        }
+    }
+
+    @RequestMapping(value = "/send", method = RequestMethod.POST)
+    @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
+    public String send(Model model, @ModelAttribute CanvasNotifierFormModel canvasNotifierFormModel) {
+        LtiAuthenticationToken token = getTokenWithoutContext();
+        String currentUserLoginId = (String) token.getPrincipal();
+
+        Job newJob = new Job();
+        newJob.setInitited_by_username(currentUserLoginId);
+        newJob.setSender_canvasid(canvasNotifierFormModel.getSelectedSenderCanvasId());
+        newJob.setSubject(canvasNotifierFormModel.getSubject());
+        newJob.setBody(canvasNotifierFormModel.getBody());
+        newJob.setJson_csv(canvasNotifierFormModel.getCnAttachmentText());
+        newJob.setStatus(JobStatus.PENDING);
+
+        jobRepository.save(newJob);
+
+        CanvasNotifierMessage canvasNotifierMessage = new CanvasNotifierMessage();
+        canvasNotifierMessage.setId(newJob.getId());
+
+//        RosterSyncMessage rsm = RosterSyncMessage.builder()
+//                .courseData(new RosterSyncCourseData(courseId, courseTitle, allGroupEmail, teacherGroupEmail))
+//                .sendNotificationForCourse(true)
+//                .build();
+        canvasNotifierMessageSender.send(canvasNotifierMessage);
+
+//        jmsService.objectSend(notificationMessage);
+
+        canvasNotifierFormModel.clearAllFields();
+        canvasNotifierFormModel.setSuccessfullySubmitted(true);
+
+        return main(model, canvasNotifierFormModel);
+    }
+}

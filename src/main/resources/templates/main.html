@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="utf-8"/>
+    <title th:text="#{canvasnotifier.tool.title}"></title>
+</head>
+<body>
+<div layout:fragment="content" class="rvt-container" role="main">
+    <form id="createNotifyForm" th:object="${canvasNotifierFormModel}" th:action="@{|/app/preview|}" method="post" enctype="multipart/form-data">
+
+        <ul th:if="${canvasNotifierFormModel.globalErrorsList != null && ! #lists.isEmpty(canvasNotifierFormModel.globalErrorsList)}" class="rvt-alert-list">
+           <li th:each="error : ${canvasNotifierFormModel.globalErrorsList}" class="rvt-alert-list__item">
+               <div class="rvt-alert rvt-alert--error" role="alert">
+                   <p th:text="${error}" class="rvt-alert__message">Message</p>
+               </div>
+           </li>
+        </ul>
+
+        <div th:if="${canvasNotifierFormModel.successfullySubmitted}" class="rvt-alert rvt-alert--success rvt-m-tb-md" role="alertdialog" aria-labelledby="success-alert-title">
+            <h1 class="rvt-alert__title" id="success-alert-title">Submission Successful!</h1>
+            <p class="rvt-alert__message">The message submission was successful. You will be notified about the status at a later time, including any issues that may have occurred during processing.</p>
+            <button class="rvt-alert__dismiss" data-alert-close>
+                <span class="v-hide">Dismiss this alert</span>
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" d="M9.41,8l5.29-5.29a1,1,0,0,0-1.41-1.41L8,6.59,2.71,1.29A1,1,0,0,0,1.29,2.71L6.59,8,1.29,13.29a1,1,0,1,0,1.41,1.41L8,9.41l5.29,5.29a1,1,0,0,0,1.41-1.41Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="rvt-grid">
+            <div class="rvt-grid__item">
+                <h1 id="cnTitle" class="rvt-ts-32 rvt-m-bottom-xs">Canvas Notifier</h1>
+
+                <label class="cnLabel" for="senderUserId">Sender's Username:</label>
+                <div>
+                    <select id="senderUserId" th:field="*{selectedSenderCanvasId}" th:classappend="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('sender')} ? rvt-validation-danger" aria-describedby="state-message" aria-invalid="true">
+                        <option th:each="user : ${canvasNotifierFormModel.userList}" th:value="${user.canvasUserId}" th:text="${user.displayName}"> REPLACE </option>
+                    </select>
+                </div>
+
+                <div th:if="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('sender')}" class="rvt-inline-alert rvt-inline-alert--danger">
+                    <div th:replace="fragments :: field-error('state-message', 'You must choose a sender.')" />
+                </div>
+
+                <label for="msgSubject" class="cnLabel rvt-m-top-md">Message Subject:</label>
+                <input id="msgSubject" th:field="*{subject}" type="text" th:classappend="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('subject')} ? rvt-validation-danger" aria-describedby="messageSubject" aria-invalid="true" />
+
+                <div th:if="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('subject')}" class="rvt-inline-alert rvt-inline-alert--danger">
+                    <div th:replace="fragments :: field-error('messageSubject', 'You must enter a subject.')" />
+                </div>
+
+                <label for="msgBody" class="cnLabel rvt-m-top-md">Message Body:</label>
+                <textarea type="text" id="msgBody" th:field="*{body}" th:classappend="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('body')} ? rvt-validation-danger" aria-describedby="description-message" aria-invalid="true"></textarea>
+
+                <div th:if="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('body')}" class="rvt-inline-alert rvt-inline-alert--danger">
+                    <div th:replace="fragments :: field-error('description-message', 'You must enter a message.')" />
+                </div>
+
+                <div class="rvt-file rvt-m-top-md" data-upload="cnAttachment">
+                    <input type="file" id="cnAttachment" name="cnAttachment" aria-describedby="cnAttachmentDescription" />
+                    <label for="cnAttachment" class="rvt-button rvt-button--secondary">
+                        <span>Recipient CSV</span>
+                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                            <path fill="currentColor" d="M10.41,1H3.5A1.3,1.3,0,0,0,2.2,2.3V13.7A1.3,1.3,0,0,0,3.5,15h9a1.3,1.3,0,0,0,1.3-1.3V4.39ZM11.8,5.21V6H9.25V3h.34ZM4.2,13V3h3V6.75A1.25,1.25,0,0,0,8.5,8h3.3v5Z"/>
+                        </svg>
+                    </label>
+                    <div class="rvt-file__preview" data-file-preview="cnAttachment" id="cnAttachmentDescription">
+                        No file selected
+                    </div>
+                </div>
+
+                <div th:if="${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('attachment')}" class="rvt-inline-alert rvt-inline-alert--danger">
+                    <div th:replace="fragments :: field-error('csvMessage', 'You must select a file.')" />
+                </div>
+
+                <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-flex rvt-vertical-center">
+                    <div class="loading-inline hideMe">
+                        <div class="rvt-loader" aria-label="Content loading"></div>
+                    </div>
+                    <div id="submitSection">
+                        <input id="action" name="action" value="" type="hidden" />
+                        <button id="continueButton" value="preview" class="rvt-button">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

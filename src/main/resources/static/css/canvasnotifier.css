@@ -1,0 +1,15 @@
+.cnLabel {
+    font-size: 100%;
+}
+
+.hideMe {
+    display: none;
+}
+
+.loading-inline {
+    opacity: 0.8;
+}
+
+.loading-inline {
+    padding-right: 1.0em;
+}
