@@ -1,4 +1,4 @@
-package edu.iu.uits.lms.microservicestemplate.config;
+package edu.iu.uits.lms.canvasnotifier.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,11 +6,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "microservices-template")
+@ConfigurationProperties(prefix = "canvasnotifier")
 @Getter
 @Setter
 public class ToolConfig {
-
    private String version;
    private String env;
+   private String canvasNotifierQueueName;
+   private String[] batchNotificationEmail;
 }
