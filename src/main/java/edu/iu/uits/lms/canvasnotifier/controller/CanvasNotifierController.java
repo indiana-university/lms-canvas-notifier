@@ -21,7 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -172,13 +171,7 @@ public class CanvasNotifierController extends LtiAuthenticationTokenAwareControl
         CanvasNotifierMessage canvasNotifierMessage = new CanvasNotifierMessage();
         canvasNotifierMessage.setId(newJob.getId());
 
-//        RosterSyncMessage rsm = RosterSyncMessage.builder()
-//                .courseData(new RosterSyncCourseData(courseId, courseTitle, allGroupEmail, teacherGroupEmail))
-//                .sendNotificationForCourse(true)
-//                .build();
         canvasNotifierMessageSender.send(canvasNotifierMessage);
-
-//        jmsService.objectSend(notificationMessage);
 
         canvasNotifierFormModel.clearAllFields();
         canvasNotifierFormModel.setSuccessfullySubmitted(true);

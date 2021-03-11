@@ -5,7 +5,6 @@ import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
-//import edu.iu.uits.lms.services.jms.JmsService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -46,10 +45,6 @@ public class CanvasNotifierControllerTest {
     @Autowired
     @Mock
     private JobRepository jobRepository;
-
-//    @Autowired
-//    @Mock
-//    private JmsService jmsService;
 
     @Autowired
     @Mock
