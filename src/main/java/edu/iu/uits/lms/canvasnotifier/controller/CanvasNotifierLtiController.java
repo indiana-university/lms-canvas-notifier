@@ -77,7 +77,7 @@ public class CanvasNotifierLtiController extends LtiController {
 
     @Override
     protected String getToolContext() {
-        return "canvasnotifier";
+        return "lms_lti_canvasnotifier";
     }
 
     @Override
