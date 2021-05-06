@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="utf-8"/>
+    <title th:text="#{canvasnotifier.tool.title}"></title>
+</head>
+<body>
+<div layout:fragment="content" class="rvt-container" role="main">
+    <form id="createNotifyForm" th:object="${canvasNotifierFormModel}" th:action="@{|/app/backorsend|}" method="post" enctype="multipart/form-data">
+        <div class="rvt-grid">
+            <div class="rvt-grid__item">
+                <h1 id="cnTitle" th:text="|#{canvasnotifier.tool.title} - Message Preview|" class="rvt-ts-32 rvt-m-bottom-xs"></h1>
+                <label class="cnLabel" for="msgUsername">Sender's Username:</label>
+                <input id="senderUserId" th:field="*{selectedSenderCanvasId}" type="hidden" class="" aria-describedby="messageUserId" aria-invalid="true" readonly />
+                <input id="msgUsername" th:field="*{selectedSenderDisplayName}" type="text" class="" aria-describedby="messageUsername" aria-invalid="true" readonly />
+
+                <label class="cnLabel rvt-m-top-md" for="msgSubject">Message Subject:</label>
+                <input id="msgSubject" th:field="*{subject}" type="text" class="" aria-describedby="messageSubject" aria-invalid="true" readonly />
+
+                <label for="msgPreviewBody" class="cnLabel rvt-m-top-md">Message Body:</label>
+                <input type="hidden" id="msgBody" th:field="*{body}" class="" aria-describedby="description-message" aria-invalid="true" readonly />
+                <textarea type="text" id="msgPreviewBody" th:field="*{previewBody}" class="" aria-describedby="description-message" aria-invalid="true" readonly></textarea>
+                </textarea>
+
+                <input type="hidden" id="msgAttachmentText" th:field="*{CnAttachmentText}" class="" aria-describedby="description-message" aria-invalid="true" readonly />
+
+
+                <div class="rvt-alert rvt-alert--info rvt-m-top-md" role="alertdialog" aria-labelledby="information-alert-title">
+                    <h1 class="rvt-alert__title" id="information-alert-title">Status message to be sent later</h1>
+                    <p class="rvt-alert__message">A status message will be sent to you later after you have submitted this form. It will contain any issues that may have been encountered during processing.</p>
+                </div>
+
+                <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-flex rvt-vertical-center">
+                    <div class="loading-inline hideMe">
+                        <div class="rvt-loader" aria-label="Content loading"></div>
+                    </div>
+                    <div id="submitSection">
+                        <input id="action" name="action" value="" type="hidden" />
+                        <button id="returnButton" value="back" class="rvt-button rvt-button--secondary">Return</button>
+                        <button id="submitButton" value="send" class="rvt-button">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
