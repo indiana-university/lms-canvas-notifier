@@ -31,21 +31,22 @@ spring:
     password: ${lms.db.password}
     type: org.springframework.jdbc.datasource.DriverManagerDataSource
   rabbitmq:
-    host: ${lms.rabbitmq.host.${app.env}}
-    port: ${lms.rabbitmq.port.${app.env}}
+    addresses: ${lms.rabbitmq.address.${app.env}}
     username: ${lms.rabbitmq.username.${app.env}}
     password: ${lms.rabbitmq.password.${app.env}}
     virtualHost: ${lms.rabbitmq.virtualHost.${app.env}}
-    listener.simple.retry:
-      enabled: true
-      initial-interval: 3s
-      max-attempts: 3
-      max-interval: 10s
-      multiplier: 2
+    listener.simple:
+      missing-queues-fatal: false
+      retry:
+        enabled: true
+        initial-interval: 3s
+        max-attempts: 3
+        max-interval: 10s
+        multiplier: 2
 canvasnotifier:
   version: @app.version@
   env: ${app.env}
-  batchNotificationEmail: iu-uits-es-ess-lms-notify@exchange@iu.edu,lms-func-l@iu.edu
+  batchNotificationEmail: iu-uits-es-ess-lms-notify@exchange.iu.edu,lms-func-l@iu.edu
   canvasNotifierQueueName: notifier_${app.env}
 server:
   error:
