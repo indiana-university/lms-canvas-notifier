@@ -16,7 +16,12 @@
 
 .req {
     color: #D10000;
-    padding-right: 0.1rem;
+    padding: 0.1rem;
+}
+
+.req-instruction {
+    font-size: 0.85rem;
+    margin: 0.6rem 0;
 }
 
 .recipients {
