@@ -20,6 +20,7 @@ import edu.iu.uits.lms.common.date.DateFormatUtil;
 import email.client.generated.api.EmailApi;
 import email.client.generated.model.EmailDetails;
 import iuonly.client.generated.api.CanvasDataApi;
+import iuonly.client.generated.model.ListWrapper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +117,7 @@ public class NotificationMessageHandler {
         log.info("Fetching canvas data for " + recipentsListForCanvasData.size() + " usernames");
 
         try {
-            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(recipentsListForCanvasData);
+            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipentsListForCanvasData));
         } catch (Exception e) {
             log.error("uh oh", e);
         }
