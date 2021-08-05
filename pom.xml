@@ -4,7 +4,7 @@
     <artifactId>canvasnotifier</artifactId>
     <packaging>jar</packaging>
     <name>canvasnotifier</name>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
 
     <parent>
         <artifactId>lms2Wow</artifactId>
@@ -21,7 +21,7 @@
         <docker_tag>stable</docker_tag>
         <helm_service_name>canvasnotifier</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
-        <lms-bom.version>4.0.8</lms-bom.version>
+        <lms-bom.version>4.0.23</lms-bom.version>
     </properties>
 
     <dependencyManagement>
