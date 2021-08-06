@@ -13,3 +13,18 @@
 .loading-inline {
     padding-right: 1.0em;
 }
+
+.req {
+    color: #D10000;
+    padding: 0.1rem;
+}
+
+.req-instruction {
+    font-size: 0.85rem;
+    margin: 0.6rem 0;
+}
+
+.recipients {
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
