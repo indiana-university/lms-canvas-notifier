@@ -87,11 +87,6 @@ public class NotificationMessageHandlerTest {
     }
 
     @Test
-    public void placeHolder() {
-
-    }
-
-    @Test
     public void testValidateNullJob() {
         JobResult jobResult = new JobResult();
 
