@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-//public class NotificationMessageHandler implements MessageHandler
 public class NotificationMessageHandler {
     @Autowired
     private AccountsApi accountsApi;
@@ -77,11 +75,7 @@ public class NotificationMessageHandler {
     @Autowired
     private UsersApi usersApi;
 
-    public boolean handleMessage(Serializable message) {
-        log.debug("Message received: " + message);
-
-        CanvasNotifierMessage canvasNotifierMessage = (CanvasNotifierMessage) message;
-
+    public boolean handleMessage(CanvasNotifierMessage canvasNotifierMessage) {
         JobResult jobResult = new JobResult();
         jobResult.setJobId(canvasNotifierMessage.getId());
 
@@ -97,7 +91,7 @@ public class NotificationMessageHandler {
         } catch (Exception e) {
             final String error = "Job # " + jobResult.getJob().getId() + " aborted due to " + e;
 
-            log.error(error);
+            log.error(error, e);
             jobResult.addErrorMessage(error);
             jobResult.getJob().failJob();
             saveJob(jobResult);
