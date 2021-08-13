@@ -25,9 +25,7 @@ import org.springframework.web.servlet.View;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
@@ -67,14 +65,10 @@ public class CanvasNotifierControllerTest {
         List authoritiesList = Arrays.asList(new SimpleGrantedAuthority("Instructor"),
                 new SimpleGrantedAuthority("ROLE_LTI_INSTRUCTOR"));
 
-        Map<String, Object> dataMap = new HashMap<>();
-
-
         final LtiAuthenticationToken ltiAuthenticationToken = new LtiAuthenticationToken("user1",
                 ID,
                 "test.uits.iu.edu",
                 authoritiesList,
-                dataMap,
                 "canvasnotifier");
 
         SecurityContextHolder.getContext().setAuthentication(ltiAuthenticationToken);

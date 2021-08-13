@@ -503,7 +503,7 @@ public class NotificationMessageHandlerTest {
         csvContent.add(new String[] {recipients[3], "team4", "superhero4"});
         csvContent.add(new String[] {"", "", ""});
 
-        List<String> recipentsListForCanvasData = notificationMessageHandler.getRecipentsListForCanvasData(csvContent);
+        List<String> recipentsListForCanvasData = notificationMessageHandler.getRecipientsListForCanvasData(csvContent);
 
         Assert.assertNotEquals(csvContent.size(), recipentsListForCanvasData.size());
 
