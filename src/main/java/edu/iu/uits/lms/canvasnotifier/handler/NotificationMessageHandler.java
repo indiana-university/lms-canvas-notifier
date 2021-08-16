@@ -105,14 +105,14 @@ public class NotificationMessageHandler {
     private boolean processJob(@NonNull JobResult jobResult) throws Exception {
         List<String[]> csvContents = CanvasNotifierUtils.deJsonCsvContent(jobResult.getJob().getJson_csv());
 
-        List<String> recipentsListForCanvasData = getRecipientsListForCanvasData(csvContents);
+        List<String> recipientsListForCanvasData = getRecipientsListForCanvasData(csvContents);
 
         Map<String, String> usernameToCanvasidMap = null;
 
-        log.info("Fetching canvas data for " + recipentsListForCanvasData.size() + " usernames");
+        log.info("Fetching canvas data for " + recipientsListForCanvasData.size() + " usernames");
 
         try {
-            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipentsListForCanvasData));
+            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipientsListForCanvasData));
         } catch (Exception e) {
             log.error("uh oh", e);
         }
