@@ -25,6 +25,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -104,14 +105,14 @@ public class NotificationMessageHandler {
     private boolean processJob(@NonNull JobResult jobResult) throws Exception {
         List<String[]> csvContents = CanvasNotifierUtils.deJsonCsvContent(jobResult.getJob().getJson_csv());
 
-        List<String> recipentsListForCanvasData = getRecipentsListForCanvasData(csvContents);
+        List<String> recipientsListForCanvasData = getRecipientsListForCanvasData(csvContents);
 
         Map<String, String> usernameToCanvasidMap = null;
 
-        log.info("Fetching canvas data for " + recipentsListForCanvasData.size() + " usernames");
+        log.info("Fetching canvas data for " + recipientsListForCanvasData.size() + " usernames");
 
         try {
-            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipentsListForCanvasData));
+            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipientsListForCanvasData));
         } catch (Exception e) {
             log.error("uh oh", e);
         }
@@ -232,7 +233,13 @@ public class NotificationMessageHandler {
             conversationCreateWrapper.setContextCode(jobResult.getJob().getSubject());
             conversationCreateWrapper.setGroupConversation(false);
 
-            Conversation createConversation = conversationsApi.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId().toString(), false);
+            // Add try/catch so that the whole job doesn't abort if there's a problem
+            Conversation createConversation = null;
+            try {
+                createConversation = conversationsApi.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId(), false);
+            } catch (RestClientException rce) {
+                log.error("Posting conversation failed for " + canvasRecipientUsername, rce);
+            }
 
             if (createConversation == null) {
                 String errorMessage = "Error sending conversation for username/canvasId = " + canvasRecipientUsername + "/" + canvasRecipientUserId;
@@ -398,7 +405,7 @@ public class NotificationMessageHandler {
         jobResult.setJob(job);
     }
 
-    public List<String> getRecipentsListForCanvasData(@NonNull List<String[]> csvContent) {
+    public List<String> getRecipientsListForCanvasData(@NonNull List<String[]> csvContent) {
         List<String> usernameList = new ArrayList<>();
 
         for (String[] line: csvContent) {

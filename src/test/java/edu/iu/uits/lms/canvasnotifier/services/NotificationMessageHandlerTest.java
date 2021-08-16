@@ -491,7 +491,7 @@ public class NotificationMessageHandlerTest {
     }
 
     @Test
-    public void testGetRecipentsListforCanvasData() {
+    public void testGetRecipientsListforCanvasData() {
         List<String[]> csvContent = new ArrayList<>();
 
         String[] headerLine = new String[] {"username", "team", "superhero"};
@@ -503,16 +503,16 @@ public class NotificationMessageHandlerTest {
         csvContent.add(new String[] {recipients[3], "team4", "superhero4"});
         csvContent.add(new String[] {"", "", ""});
 
-        List<String> recipentsListForCanvasData = notificationMessageHandler.getRecipentsListForCanvasData(csvContent);
+        List<String> recipientsListForCanvasData = notificationMessageHandler.getRecipientsListForCanvasData(csvContent);
 
-        Assert.assertNotEquals(csvContent.size(), recipentsListForCanvasData.size());
+        Assert.assertNotEquals(csvContent.size(), recipientsListForCanvasData.size());
 
         // should not be header line nor the empty string line
-        Assert.assertEquals(csvContent.size() - 2, recipentsListForCanvasData.size());
+        Assert.assertEquals(csvContent.size() - 2, recipientsListForCanvasData.size());
 
-        Assert.assertEquals(recipients[0], recipentsListForCanvasData.get(0));
-        Assert.assertEquals(recipients[1], recipentsListForCanvasData.get(1));
-        Assert.assertEquals(recipients[2], recipentsListForCanvasData.get(2));
-        Assert.assertEquals(recipients[3], recipentsListForCanvasData.get(3));
+        Assert.assertEquals(recipients[0], recipientsListForCanvasData.get(0));
+        Assert.assertEquals(recipients[1], recipientsListForCanvasData.get(1));
+        Assert.assertEquals(recipients[2], recipientsListForCanvasData.get(2));
+        Assert.assertEquals(recipients[3], recipientsListForCanvasData.get(3));
     }
 }
