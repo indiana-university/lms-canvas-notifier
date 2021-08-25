@@ -244,6 +244,7 @@ public class NotificationMessageHandler {
             if (createConversation == null) {
                 String errorMessage = "Error sending conversation for username/canvasId = " + canvasRecipientUsername + "/" + canvasRecipientUserId;
                 jobResult.addErrorMessage(errorMessage);
+                jobResult.getProcessCounts().incrementFailureCount();
 
                 Recipient newRecipient = new Recipient(canvasRecipientUsername, canvasRecipientUserId, errorMessage);
                 newRecipient.setJob(jobResult.getJob());
