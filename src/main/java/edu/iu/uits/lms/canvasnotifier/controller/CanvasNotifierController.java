@@ -83,7 +83,8 @@ public class CanvasNotifierController extends LtiAuthenticationTokenAwareControl
         if (canvasNotifierFormModel.getSelectedSenderCanvasId() == null ||
                 canvasNotifierFormModel.getSelectedSenderCanvasId().isEmpty() || canvasNotifierFormModel.getSelectedSenderCanvasId().equals("-1")) {
             canvasNotifierFormModel.getFieldErrorsMap().put("sender", true);
-            return main(model, canvasNotifierFormModel);
+        } else {
+            canvasNotifierFormModel.setSelectedSenderDisplayName(userRepository.findByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId()).getDisplayName());
         }
 
         if (canvasNotifierFormModel.getSubject() == null || canvasNotifierFormModel.getSubject().isEmpty()) {
@@ -93,9 +94,7 @@ public class CanvasNotifierController extends LtiAuthenticationTokenAwareControl
         if (canvasNotifierFormModel.getBody() == null || canvasNotifierFormModel.getBody().isEmpty()) {
             canvasNotifierFormModel.getFieldErrorsMap().put("body", true);
         }
-
-        canvasNotifierFormModel.setSelectedSenderDisplayName(userRepository.findByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId()).getDisplayName());
-
+        
         MultipartFile cnAttachment = canvasNotifierFormModel.getCnAttachment();
 
         if (cnAttachment.isEmpty()) {
