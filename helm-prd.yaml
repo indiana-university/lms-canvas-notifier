@@ -17,7 +17,7 @@ ingress:
     - host: "canvasnotifier.apps.iu.edu"
       paths: []
 
-activeProfiles: "prd"
+activeProfiles: "redis,prd"
 
 serviceAccountName: canvasnotifier-prd
 
