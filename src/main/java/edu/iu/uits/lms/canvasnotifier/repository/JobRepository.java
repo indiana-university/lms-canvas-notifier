@@ -9,4 +9,5 @@ import java.util.List;
 @Component
 public interface JobRepository extends PagingAndSortingRepository<Job, Long> {
     List<Job> findAllRunningJobs();
+    List<Job> getElevatedJobsOlderThan();
 }

@@ -122,10 +122,21 @@ public class NotificationMessageHandler {
         // this is so in case user was already an admin, after the job we don't de-elevate them
         boolean wasAccountAdminBeforeJobRun = accountsApi.isAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
 
-        // elevate sender user
-        if (! accountsApi.elevateToAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()))) {
-            jobResult.addErrorMessage("cannot elevate sending user " + jobResult.getCanvasSenderUser().getId());
+        if (wasAccountAdminBeforeJobRun) {
+            jobResult.getJob().setSenderWasElevated(false);
+        } else {
+            jobResult.getJob().setSenderWasElevated(true);
+
+            // elevate sender user
+            if (! accountsApi.elevateToAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()))) {
+                jobResult.addErrorMessage("cannot elevate sending user " + jobResult.getCanvasSenderUser().getId());
+            }
+
+            log.info("Sender {} was elevated", jobResult.getSenderDisplayName() +
+                                               " (" + jobResult.getCanvasSenderUser().getId() + ")");
         }
+
+        saveJob(jobResult);
 
         // validate things up to this point
         if (emailIfReady(jobResult)) {
@@ -275,6 +286,11 @@ public class NotificationMessageHandler {
 
         if (! wasAccountAdminBeforeJobRun) {
             accountsApi.revokeAsAccountAdmin(canvasApi.getRootAccount(), jobResult.getCanvasSenderUser().getId().toString());
+            log.info("Sender {} was DE-elevated", jobResult.getSenderDisplayName() +
+                    " (" + jobResult.getCanvasSenderUser().getId() + ")");
+
+            jobResult.getJob().setSenderWasElevated(false);
+            saveJob(jobResult);
         }
 
         return true;
