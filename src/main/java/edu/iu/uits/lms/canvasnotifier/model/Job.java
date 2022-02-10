@@ -32,7 +32,8 @@ import java.util.List;
         @NamedQuery(name = "Job.findAllRunningJobs", query = "from Job where status in ('STARTED', 'RESTARTED') order by id"),
 
 // 300 = 5 minutes in below query
-        @NamedQuery(name = "Job.getElevatedJobsOlderThan", query = "from Job job where job.senderWasElevated = true and sysdate - 300/(24*60*60) > job.modifiedOn order by job.id asc")
+        @NamedQuery(name = "Job.getElevatedJobsOlderThan", query = "from Job job where job.senderWasElevated = true and sysdate - 300/(24*60*60) > job.modifiedOn order by job.id asc"),
+        @NamedQuery(name = "Job.getRunningJobsBySenderCanvasId", query = "from Job job where job.sender_canvasid = :senderId and status = 'RUNNING' or status = 'STARTED' or status = 'RESTARTED' order by job.id asc")
 })
 
 @SequenceGenerator(name = "CANVASNOTIFIER_JOB_ID_SEQ", sequenceName = "CANVASNOTIFIER_JOB_ID_SEQ", allocationSize = 1)
@@ -76,6 +77,9 @@ public class Job extends ModelWithDates {
 
     @Column(name = "SENDER_WAS_ELEVATED")
     private Boolean senderWasElevated;
+
+    @Column(name = "SENDER_IS_ELEVATED")
+    private Boolean senderIsElevated;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "job", orphanRemoval = true)
     private List<Recipient> recipients;

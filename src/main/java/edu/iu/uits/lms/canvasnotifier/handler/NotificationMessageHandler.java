@@ -15,6 +15,7 @@ import edu.iu.uits.lms.canvasnotifier.model.Recipient;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
 import edu.iu.uits.lms.common.date.DateFormatUtil;
 import email.client.generated.api.EmailApi;
@@ -51,6 +52,9 @@ public class NotificationMessageHandler {
 
     @Autowired
     private CanvasDataApi canvasDataApi;
+
+    @Autowired
+    private CanvasNotifierService canvasNotifierService;
 
     @Autowired
     private ConversationsApi conversationsApi;
@@ -119,13 +123,14 @@ public class NotificationMessageHandler {
 
         log.info("Fetched " + usernameToCanvasidMap.size() + " canvas ids from canvas data");
 
-        // this is so in case user was already an admin, after the job we don't de-elevate them
+        // this is so in case the sending user was already an admin, after the job we don't de-elevate them
         boolean wasAccountAdminBeforeJobRun = accountsApi.isAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
 
         if (wasAccountAdminBeforeJobRun) {
             jobResult.getJob().setSenderWasElevated(false);
         } else {
             jobResult.getJob().setSenderWasElevated(true);
+            jobResult.getJob().setSenderIsElevated(true);
 
             // elevate sender user
             if (! accountsApi.elevateToAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()))) {
@@ -285,12 +290,18 @@ public class NotificationMessageHandler {
         emailIfReady(jobResult);
 
         if (! wasAccountAdminBeforeJobRun) {
-            accountsApi.revokeAsAccountAdmin(canvasApi.getRootAccount(), jobResult.getCanvasSenderUser().getId().toString());
-            log.info("Sender {} was DE-elevated", jobResult.getSenderDisplayName() +
-                    " (" + jobResult.getCanvasSenderUser().getId() + ")");
+            boolean isSenderUserDeElevated = canvasNotifierService.deElevateSenderUser(jobResult.getJob());
 
-            jobResult.getJob().setSenderWasElevated(false);
-            saveJob(jobResult);
+            if (isSenderUserDeElevated) {
+                log.info("Sender {} was DE-elevated", jobResult.getSenderDisplayName() +
+                        " (" + jobResult.getCanvasSenderUser().getId() + ")");
+
+                jobResult.getJob().setSenderIsElevated(false);
+                saveJob(jobResult);
+
+            } else {
+                log.info("Sender {} could NOT be DE-elevated", jobResult.getJob().getSender_canvasid());
+            }
         }
 
         return true;

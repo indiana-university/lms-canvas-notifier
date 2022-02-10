@@ -1,11 +1,10 @@
 package edu.iu.uits.lms.canvasnotifier.job;
 
-import canvas.client.generated.api.AccountsApi;
-import canvas.client.generated.api.CanvasApi;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
+import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import email.client.generated.api.EmailApi;
 import email.client.generated.model.EmailDetails;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +18,7 @@ import java.util.List;
 @Slf4j
 public class CanvasNotifierExpireElevationsService {
    @Autowired
-   private AccountsApi accountsApi;
-
-   @Autowired
-   private CanvasApi canvasApi;
+   private CanvasNotifierService canvasNotifierService;
 
    @Autowired
    private EmailApi emailApi;
@@ -38,26 +34,38 @@ public class CanvasNotifierExpireElevationsService {
 
       List<Job> jobs = jobRepository.getElevatedJobsOlderThan();
 
-      List<String> jobIds = new ArrayList<>();
+      List<String> deElevatedJobIds = new ArrayList<>();
+      List<String> failedDeElevatedJobIds = new ArrayList<>();
 
       for (Job job : jobs) {
          log.info("De-elevating user {}", job.getSender_canvasid());
 
-         accountsApi.revokeAsAccountAdmin(canvasApi.getRootAccount(), job.getSender_canvasid());
-         job.setStatus(JobStatus.FORCE_DEELEVATE);
-         job.setSenderWasElevated(false);
+         boolean isSenderUserDeElevated = canvasNotifierService.deElevateSenderUser(job);
 
-         jobRepository.save(job);
+         if (isSenderUserDeElevated) {
+            job.setStatus(JobStatus.FORCE_DEELEVATE);
+            job.setSenderIsElevated(false);
 
-         jobIds.add(job.getId().toString());
+            jobRepository.save(job);
+            deElevatedJobIds.add(job.getId().toString());
+         } else {
+            log.info("Cannot de-elevate job id {} sender canvas user id {}", job.getId(), job.getSender_canvasid());
+            failedDeElevatedJobIds.add(job.getId().toString());
+         }
       }
 
       String resultsMessage = String.format("De-elevated %s Jobs", jobs == null || jobs.size() == 0
                                                                    ? "no" : jobs.size());
 
-      if (jobIds.size() > 0) {
-         resultsMessage += String.format(" with IDs %s", String.join(",", jobIds));
+      if (deElevatedJobIds.size() > 0 || failedDeElevatedJobIds.size() > 0) {
+         if (deElevatedJobIds.size() > 0) {
+            resultsMessage += String.format(" with IDs %s", String.join(",", deElevatedJobIds));
+         }
 
+         if (failedDeElevatedJobIds.size() > 0) {
+            resultsMessage += String.format(". Failed to de-elevate jobs with IDs %s.",
+                    String.join(",", failedDeElevatedJobIds));
+         }
          String[] emailAddresses = toolConfig.getBatchNotificationEmail();
          String subject = emailApi.getStandardHeader() + " canvas notifier expire elevations";
 
