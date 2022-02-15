@@ -1,6 +1,7 @@
 package edu.iu.uits.lms.canvasnotifier;
 
 import canvas.config.EnableCanvasClient;
+import edu.iu.uits.lms.common.batch.EnableBatch;
 import edu.iu.uits.lms.common.samesite.EnableCookieFilter;
 import edu.iu.uits.lms.common.server.GitRepositoryState;
 import edu.iu.uits.lms.common.server.ServerInfo;
@@ -23,6 +24,7 @@ import java.util.Date;
 
 @SpringBootApplication
 @EnableGlobalErrorHandler
+@EnableBatch
 @PropertySource(value = {"classpath:env.properties",
       "${app.fullFilePath}/security.properties"}, ignoreResourceNotFound = true)
 @Slf4j
