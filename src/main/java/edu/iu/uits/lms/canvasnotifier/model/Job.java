@@ -32,7 +32,7 @@ import java.util.List;
         @NamedQuery(name = "Job.findAllRunningJobs", query = "from Job where status in ('STARTED', 'RESTARTED') order by id"),
 
 // 300 = 5 minutes in below query
-        @NamedQuery(name = "Job.getElevatedJobsOlderThan", query = "from Job job where job.senderWasElevated = true and sysdate - 300/(24*60*60) > job.modifiedOn order by job.id asc"),
+        @NamedQuery(name = "Job.getElevatedJobsOlderThan", query = "from Job job where job.senderWasElevated = true and job.senderIsElevated = true and sysdate - 300/(24*60*60) > job.modifiedOn order by job.id asc"),
         @NamedQuery(name = "Job.getRunningJobsBySenderCanvasId", query = "from Job job where job.sender_canvasid = :senderId and (status = 'PENDING' or status = 'RUNNING' or status = 'STARTED' or status = 'RESTARTED') order by job.id asc")
 })
 
