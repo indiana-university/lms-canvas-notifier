@@ -4,7 +4,7 @@
     <artifactId>canvasnotifier</artifactId>
     <packaging>jar</packaging>
     <name>canvasnotifier</name>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.0.5</version>
 
     <parent>
         <artifactId>lms2Wow</artifactId>
