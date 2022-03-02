@@ -6,5 +6,6 @@ public enum JobStatus {
     RESTARTED,
     ABORTED,
     FINISHED,
-    FAILED
+    FAILED,
+    FORCE_DEELEVATE
 }
