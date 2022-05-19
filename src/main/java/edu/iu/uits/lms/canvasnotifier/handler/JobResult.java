@@ -1,6 +1,6 @@
 package edu.iu.uits.lms.canvasnotifier.handler;
 
-import canvas.client.generated.model.User;
+import edu.iu.uits.lms.canvas.model.User;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import lombok.Data;
 import lombok.NonNull;

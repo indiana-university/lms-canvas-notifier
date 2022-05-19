@@ -12,19 +12,19 @@ import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
 import edu.iu.uits.lms.lti.LTIConstants;
-
-import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
+import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.service.OidcTokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/app")
 @Slf4j
-public class CanvasNotifierController extends LtiAuthenticationTokenAwareController {
+public class CanvasNotifierController extends OidcTokenAwareController {
     @Autowired
     private JobRepository jobRepository;
 
@@ -154,8 +154,9 @@ public class CanvasNotifierController extends LtiAuthenticationTokenAwareControl
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
     public String send(Model model, @ModelAttribute CanvasNotifierFormModel canvasNotifierFormModel) {
-        LtiAuthenticationToken token = getTokenWithoutContext();
-        String currentUserLoginId = (String) token.getPrincipal();
+        OidcAuthenticationToken token = getTokenWithoutContext();
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+        String currentUserLoginId = oidcTokenUtils.getUserLoginId();
 
         Job newJob = new Job();
         newJob.setInitited_by_username(currentUserLoginId);

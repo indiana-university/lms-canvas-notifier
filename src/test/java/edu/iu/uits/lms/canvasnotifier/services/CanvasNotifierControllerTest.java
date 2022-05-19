@@ -4,11 +4,12 @@ import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
+import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.service.TestUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.View;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +59,7 @@ public class CanvasNotifierControllerTest {
 
     private enum Method { GET, POST }
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
@@ -65,13 +67,14 @@ public class CanvasNotifierControllerTest {
         List authoritiesList = Arrays.asList(new SimpleGrantedAuthority("Instructor"),
                 new SimpleGrantedAuthority("ROLE_LTI_INSTRUCTOR"));
 
-        final LtiAuthenticationToken ltiAuthenticationToken = new LtiAuthenticationToken("user1",
-                ID,
-                "test.uits.iu.edu",
-                authoritiesList,
-                "canvasnotifier");
+//        final LtiAuthenticationToken ltiAuthenticationToken = new LtiAuthenticationToken("user1",
+//                ID,
+//                "test.uits.iu.edu",
+//                authoritiesList,
+//                "canvasnotifier");
+        OidcAuthenticationToken token = TestUtils.buildToken("userId", ID, LTIConstants.INSTRUCTOR_AUTHORITY);
 
-        SecurityContextHolder.getContext().setAuthentication(ltiAuthenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(token);
 
         Mockito.reset(userRepository);
 

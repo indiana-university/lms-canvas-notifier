@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.RestUser;
 import edu.iu.uits.lms.canvasnotifier.rest.UserRestController;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -37,7 +36,7 @@ public class UserRestControllerTest {
     @Mock
     private View view;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(userRestController)

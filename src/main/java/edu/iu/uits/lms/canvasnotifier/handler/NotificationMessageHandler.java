@@ -1,12 +1,12 @@
 package edu.iu.uits.lms.canvasnotifier.handler;
 
-import canvas.client.generated.api.AccountsApi;
-import canvas.client.generated.api.CanvasApi;
-import canvas.client.generated.api.ConversationsApi;
-import canvas.client.generated.api.UsersApi;
-import canvas.client.generated.model.Conversation;
-import canvas.client.generated.model.ConversationCreateWrapper;
-import canvas.client.generated.model.User;
+import edu.iu.uits.lms.canvas.model.Conversation;
+import edu.iu.uits.lms.canvas.model.ConversationCreateWrapper;
+import edu.iu.uits.lms.canvas.model.User;
+import edu.iu.uits.lms.canvas.services.AccountService;
+import edu.iu.uits.lms.canvas.services.CanvasService;
+import edu.iu.uits.lms.canvas.services.ConversationService;
+import edu.iu.uits.lms.canvas.services.UserService;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
@@ -18,12 +18,13 @@ import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
 import edu.iu.uits.lms.common.date.DateFormatUtil;
-import email.client.generated.api.EmailApi;
-import email.client.generated.model.EmailDetails;
-import iuonly.client.generated.api.CanvasDataApi;
-import iuonly.client.generated.model.ListWrapper;
+import edu.iu.uits.lms.email.model.EmailDetails;
+import edu.iu.uits.lms.email.service.EmailService;
+import edu.iu.uits.lms.iuonly.model.ListWrapper;
+import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -35,35 +36,32 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class NotificationMessageHandler {
     @Autowired
-    private AccountsApi accountsApi;
+    private AccountService accountService;
 
     @Autowired
-    private CanvasApi canvasApi;
+    private CanvasService canvasService;
 
     @Autowired
-    private CanvasDataApi canvasDataApi;
+    private CanvasDataServiceImpl canvasDataService;
 
     @Autowired
     private CanvasNotifierService canvasNotifierService;
 
     @Autowired
-    private ConversationsApi conversationsApi;
+    private ConversationService conversationService;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    private EmailApi emailApi;
+    private EmailService emailService;
 
     @Autowired
     private JobRepository jobRepository;
@@ -78,7 +76,7 @@ public class NotificationMessageHandler {
     private UserRepository userRepository;
 
     @Autowired
-    private UsersApi usersApi;
+    private UserService userService;
 
     public boolean handleMessage(CanvasNotifierMessage canvasNotifierMessage) {
         JobResult jobResult = new JobResult();
@@ -116,7 +114,9 @@ public class NotificationMessageHandler {
         log.info("Fetching canvas data for " + recipientsListForCanvasData.size() + " usernames");
 
         try {
-            usernameToCanvasidMap = canvasDataApi.getActiveUserMapOfIuUsernameToCanvasId(new ListWrapper().listItems(recipientsListForCanvasData));
+            ListWrapper listWrapper = new ListWrapper();
+            listWrapper.setListItems(recipientsListForCanvasData);
+            usernameToCanvasidMap = canvasDataService.getActiveUserMapOfIuUsernameToCanvasId(listWrapper);
         } catch (Exception e) {
             log.error("uh oh", e);
         }
@@ -124,7 +124,7 @@ public class NotificationMessageHandler {
         log.info("Fetched " + usernameToCanvasidMap.size() + " canvas ids from canvas data");
 
         // this is so in case the sending user was already an admin, after the job we don't de-elevate them
-        boolean wasAccountAdminBeforeJobRun = accountsApi.isAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
+        boolean wasAccountAdminBeforeJobRun = accountService.isAccountAdmin(canvasService.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
 
         if (wasAccountAdminBeforeJobRun) {
             jobResult.getJob().setSenderWasElevated(false);
@@ -133,7 +133,7 @@ public class NotificationMessageHandler {
             jobResult.getJob().setSenderIsElevated(true);
 
             // elevate sender user
-            if (! accountsApi.elevateToAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()))) {
+            if (! accountService.elevateToAccountAdmin(canvasService.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()))) {
                 jobResult.addErrorMessage("cannot elevate sending user " + jobResult.getCanvasSenderUser().getId());
             }
 
@@ -180,7 +180,7 @@ public class NotificationMessageHandler {
                 log.info("*** ABORTED Job #" + jobResult.getJob().getId());
 
                 if (! wasAccountAdminBeforeJobRun) {
-                    accountsApi.revokeAsAccountAdmin(canvasApi.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
+                    accountService.revokeAsAccountAdmin(canvasService.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
                 }
 
                 return true;
@@ -243,7 +243,7 @@ public class NotificationMessageHandler {
 
             // send conversation
             ConversationCreateWrapper conversationCreateWrapper = new ConversationCreateWrapper();
-            conversationCreateWrapper.setRecipients(Collections.singletonList(canvasRecipientUserId));
+            conversationCreateWrapper.setRecipients(new String[] {canvasRecipientUserId});
             conversationCreateWrapper.setSubject(jobResult.getJob().getSubject());
             conversationCreateWrapper.setBody(newBody);
             conversationCreateWrapper.setContextCode(jobResult.getJob().getSubject());
@@ -252,7 +252,7 @@ public class NotificationMessageHandler {
             // Add try/catch so that the whole job doesn't abort if there's a problem
             Conversation createConversation = null;
             try {
-                createConversation = conversationsApi.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId(), false);
+                createConversation = conversationService.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId(), false);
             } catch (RestClientException rce) {
                 log.error("Posting conversation failed for " + canvasRecipientUsername, rce);
             }
@@ -360,7 +360,7 @@ public class NotificationMessageHandler {
             return;
         }
 
-        User canvasInitiatingUser = usersApi.getUserBySisLoginId(job.getInitited_by_username());
+        User canvasInitiatingUser = userService.getUserBySisLoginId(job.getInitited_by_username());
 
         if (canvasInitiatingUser == null) {
             String errorMessage = "Initiated by user not found in canvas";
@@ -398,7 +398,7 @@ public class NotificationMessageHandler {
             return;
         }
 
-        User canvasSenderUser = usersApi.getUserByCanvasId(job.getSender_canvasid());
+        User canvasSenderUser = userService.getUserByCanvasId(job.getSender_canvasid());
 
         if (canvasSenderUser == null) {
             String errorMessage = "Sender user not found in canvas";
@@ -468,7 +468,7 @@ public class NotificationMessageHandler {
         subjectTitleStringBuilder.append("Canvas Notifier - ");
 
         StringBuilder finalSubjectStringBuilder = new StringBuilder();
-        finalSubjectStringBuilder.append(emailApi.getStandardHeader());
+        finalSubjectStringBuilder.append(emailService.getStandardHeader());
         finalSubjectStringBuilder.append(" - ");
         finalSubjectStringBuilder.append(subjectTitleStringBuilder);
         finalSubjectStringBuilder.append(" - ");
@@ -530,20 +530,14 @@ public class NotificationMessageHandler {
         errorStringBuilder.append(jobResult.getProcessCounts().getTotalCount());
         errorStringBuilder.append("\r\n");
 
-        // this comes back as an array that if one tries to do a Arrays.asList() it makes it a List that cannot be added to
-        // so we'll create a new list and add to it one by one
-        List<String> emailAddresses = Arrays.stream(toolConfig.getBatchNotificationEmail())
-                .collect(Collectors.toList());
-
-        emailAddresses.add(jobResult.getCanvasInitiatingUser().getEmail());
-
+        String[] emailAddresses = ArrayUtils.add(toolConfig.getBatchNotificationEmail(), jobResult.getCanvasInitiatingUser().getEmail());
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setRecipients(emailAddresses);
         emailDetails.setSubject(finalSubjectStringBuilder.toString());
         emailDetails.setBody(errorStringBuilder.toString());
 
         try {
-            emailApi.sendEmail(emailDetails, true);
+            emailService.sendEmail(emailDetails, true);
         } catch (Exception e) {
             log.error("uh oh", e);
             return false;
@@ -559,13 +553,13 @@ public class NotificationMessageHandler {
 
         // send conversation
         ConversationCreateWrapper conversationCreateWrapper = new ConversationCreateWrapper();
-        conversationCreateWrapper.setRecipients(Collections.singletonList(jobResult.getCanvasInitiatingUser().getId()));
+        conversationCreateWrapper.setRecipients(new String[] {jobResult.getCanvasInitiatingUser().getId()});
         conversationCreateWrapper.setSubject(jobResult.getJob().getSubject());
         conversationCreateWrapper.setBody(errorStringBuilder.toString());
         conversationCreateWrapper.setContextCode(jobResult.getJob().getSubject());
         conversationCreateWrapper.setGroupConversation(false);
 
-        Conversation resultsConversation = conversationsApi.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId(), false);
+        Conversation resultsConversation = conversationService.postConversation(conversationCreateWrapper, jobResult.getCanvasSenderUser().getId(), false);
 
         if (resultsConversation != null) {
             log.debug("Initiator's conversation sent");
@@ -588,7 +582,7 @@ public class NotificationMessageHandler {
         if (canvasUserId == null) {
             log.debug(username + " cannot find in canvas data. Trying instructure canvas lookup...");
 
-            User user = usersApi.getUserBySisLoginId(username);
+            User user = userService.getUserBySisLoginId(username);
 
             if (user != null) {
                 log.debug(username + " found in instructure canvas lookup");

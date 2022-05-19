@@ -1,8 +1,8 @@
 package edu.iu.uits.lms.canvasnotifier.job;
 
 import edu.iu.uits.lms.common.batch.BatchJob;
-import iuonly.client.generated.api.ErrorContactApi;
-import iuonly.client.generated.model.ErrorContactPostForm;
+import edu.iu.uits.lms.iuonly.model.errorcontact.ErrorContactPostForm;
+import edu.iu.uits.lms.iuonly.services.ErrorContactServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -23,7 +23,7 @@ public class CanvasNotifierExpireElevationsJob implements BatchJob {
     private CanvasNotifierExpireElevationsJob job;
 
     @Autowired
-    private ErrorContactApi errorContactApi;
+    private ErrorContactServiceImpl errorContactService;
 
     public CanvasNotifierExpireElevationsJob(CanvasNotifierExpireElevationsService canvasNotifierExpireElevationService, ConfigurableApplicationContext ctx) {
         this.canvasNotifierExpireElevationService = canvasNotifierExpireElevationService;
@@ -47,7 +47,7 @@ public class CanvasNotifierExpireElevationsJob implements BatchJob {
             errorContactPostForm.setJobCode(getJobCode());
             errorContactPostForm.setMessage("The Canvas Notifier Expire Elevations job has unexpectedly failed");
 
-            errorContactApi.postEvent(errorContactPostForm);
+            errorContactService.postEvent(errorContactPostForm);
         }
 
         ctx.close();

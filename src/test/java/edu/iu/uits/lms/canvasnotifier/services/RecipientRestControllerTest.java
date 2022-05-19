@@ -7,9 +7,9 @@ import edu.iu.uits.lms.canvasnotifier.model.Recipient;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.RecipientRestController;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -43,7 +43,7 @@ public class RecipientRestControllerTest {
     @Mock
     private View view;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(recipientRestController)
@@ -71,11 +71,11 @@ public class RecipientRestControllerTest {
 
         Recipient resultRecipient = new Gson().fromJson(resultJson, Recipient.class);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultRecipient);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultRecipient);
 
-        Assert.assertEquals(recipient1.getId(), resultRecipient.getId());
-        Assert.assertEquals(recipient1.getUsername(), resultRecipient.getUsername());
+        Assertions.assertEquals(recipient1.getId(), resultRecipient.getId());
+        Assertions.assertEquals(recipient1.getUsername(), resultRecipient.getUsername());
     }
 
     @Test
@@ -111,16 +111,16 @@ public class RecipientRestControllerTest {
         Type customType = new TypeToken<ArrayList<Recipient>>(){}.getType();
         List<Recipient> resultRecipientList = new Gson().fromJson(resultJson, customType);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultRecipientList);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultRecipientList);
 
-        Assert.assertEquals(2, resultRecipientList.size());
+        Assertions.assertEquals(2, resultRecipientList.size());
 
-        Assert.assertEquals(recipient1.getId(), resultRecipientList.get(0).getId());
-        Assert.assertEquals(recipient1.getUsername(), resultRecipientList.get(0).getUsername());
+        Assertions.assertEquals(recipient1.getId(), resultRecipientList.get(0).getId());
+        Assertions.assertEquals(recipient1.getUsername(), resultRecipientList.get(0).getUsername());
 
-        Assert.assertEquals(recipient2.getId(), resultRecipientList.get(1).getId());
-        Assert.assertEquals(recipient2.getUsername(), resultRecipientList.get(1).getUsername());
+        Assertions.assertEquals(recipient2.getId(), resultRecipientList.get(1).getId());
+        Assertions.assertEquals(recipient2.getUsername(), resultRecipientList.get(1).getUsername());
     }
 
 }

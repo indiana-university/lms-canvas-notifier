@@ -2,9 +2,9 @@ package edu.iu.uits.lms.canvasnotifier.services;
 
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class CanvasNotifierUtilsTest {
     private String jsonCsvString;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         csvContents = new ArrayList<>();
         csvContents.add(new String[]{"Username", "variableName1", "variableName2"});
@@ -38,28 +38,28 @@ public class CanvasNotifierUtilsTest {
     public void testdeJsonCsvContent() {
         List<String[]> csvContent = CanvasNotifierUtils.deJsonCsvContent(jsonCsvString);
 
-        Assert.assertNotEquals(0, csvContent.size());
-        Assert.assertEquals(3, csvContent.get(0).length);
+        Assertions.assertNotEquals(0, csvContent.size());
+        Assertions.assertEquals(3, csvContent.get(0).length);
 
-        Assert.assertEquals("username", csvContent.get(0)[0].trim());
-        Assert.assertEquals("team", csvContent.get(0)[1].trim());
-        Assert.assertEquals("superhero", csvContent.get(0)[2].trim());
+        Assertions.assertEquals("username", csvContent.get(0)[0].trim());
+        Assertions.assertEquals("team", csvContent.get(0)[1].trim());
+        Assertions.assertEquals("superhero", csvContent.get(0)[2].trim());
 
-        Assert.assertEquals(recipients[0], csvContent.get(1)[0].trim());
-        Assert.assertEquals("Fuel", csvContent.get(1)[1].trim());
-        Assert.assertEquals("spiderman", csvContent.get(1)[2].trim());
+        Assertions.assertEquals(recipients[0], csvContent.get(1)[0].trim());
+        Assertions.assertEquals("Fuel", csvContent.get(1)[1].trim());
+        Assertions.assertEquals("spiderman", csvContent.get(1)[2].trim());
 
-        Assert.assertEquals(recipients[1], csvContent.get(2)[0].trim());
-        Assert.assertEquals("Bills", csvContent.get(2)[1].trim());
-        Assert.assertEquals("Wonder Woman", csvContent.get(2)[2].trim());
+        Assertions.assertEquals(recipients[1], csvContent.get(2)[0].trim());
+        Assertions.assertEquals("Bills", csvContent.get(2)[1].trim());
+        Assertions.assertEquals("Wonder Woman", csvContent.get(2)[2].trim());
 
-        Assert.assertEquals(recipients[2], csvContent.get(3)[0].trim());
-        Assert.assertEquals("Express", csvContent.get(3)[1].trim());
-        Assert.assertEquals("batman", csvContent.get(3)[2].trim());
+        Assertions.assertEquals(recipients[2], csvContent.get(3)[0].trim());
+        Assertions.assertEquals("Express", csvContent.get(3)[1].trim());
+        Assertions.assertEquals("batman", csvContent.get(3)[2].trim());
 
-        Assert.assertEquals(recipients[3], csvContent.get(4)[0].trim());
-        Assert.assertEquals("crap team", csvContent.get(4)[1].trim());
-        Assert.assertEquals("me", csvContent.get(4)[2].trim());
+        Assertions.assertEquals(recipients[3], csvContent.get(4)[0].trim());
+        Assertions.assertEquals("crap team", csvContent.get(4)[1].trim());
+        Assertions.assertEquals("me", csvContent.get(4)[2].trim());
 
     }
 
@@ -67,26 +67,26 @@ public class CanvasNotifierUtilsTest {
     public void testCreateCsvLineDataMap() {
         Map<String, String> lineMappedResults = CanvasNotifierUtils.createCsvLineDataMap(csvContents, 1);
 
-        Assert.assertTrue(lineMappedResults.containsKey(CanvasNotifierUtils.USERNAME_COLUMN_NAME));
+        Assertions.assertTrue(lineMappedResults.containsKey(CanvasNotifierUtils.USERNAME_COLUMN_NAME));
 
-        Assert.assertTrue(lineMappedResults.containsKey("username"));
-        Assert.assertTrue(lineMappedResults.containsKey("variablename1"));
-        Assert.assertTrue(lineMappedResults.containsKey("variablename2"));
+        Assertions.assertTrue(lineMappedResults.containsKey("username"));
+        Assertions.assertTrue(lineMappedResults.containsKey("variablename1"));
+        Assertions.assertTrue(lineMappedResults.containsKey("variablename2"));
 
         // should be all lowercased
-        Assert.assertFalse(lineMappedResults.containsKey("Username"));
+        Assertions.assertFalse(lineMappedResults.containsKey("Username"));
 
-        Assert.assertEquals("Username1", lineMappedResults.get("username"));
-        Assert.assertEquals("Value1-1", lineMappedResults.get("variablename1"));
-        Assert.assertEquals("Value2-1", lineMappedResults.get("variablename2"));
+        Assertions.assertEquals("Username1", lineMappedResults.get("username"));
+        Assertions.assertEquals("Value1-1", lineMappedResults.get("variablename1"));
+        Assertions.assertEquals("Value2-1", lineMappedResults.get("variablename2"));
 
 
         // try a different line
         lineMappedResults = CanvasNotifierUtils.createCsvLineDataMap(csvContents, 2);
 
-        Assert.assertEquals("Username2", lineMappedResults.get("username"));
-        Assert.assertEquals("Value1-2", lineMappedResults.get("variablename1"));
-        Assert.assertEquals("Value2-2", lineMappedResults.get("variablename2"));
+        Assertions.assertEquals("Username2", lineMappedResults.get("username"));
+        Assertions.assertEquals("Value1-2", lineMappedResults.get("variablename1"));
+        Assertions.assertEquals("Value2-2", lineMappedResults.get("variablename2"));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class CanvasNotifierUtilsTest {
 
         Map<String, String> lineMappedResults = CanvasNotifierUtils.createCsvLineDataMap(csvContents, 1);
 
-        Assert.assertEquals("Username1, how is Value1-1 and Value2-1 ?",
+        Assertions.assertEquals("Username1, how is Value1-1 and Value2-1 ?",
                 CanvasNotifierUtils.getVariableReplacedBody(lineMappedResults, text));
     }
 }
