@@ -1,6 +1,10 @@
 # lms-canvas-canvas-notifier
 App for authorized users to send Canvas messages to users in bulk.
 
+## :warning: Important Security Disclaimer :warning:
+This tool will temporarily elevate the permissions of the designated sender to that of an account admin in your Canvas instance.
+Make sure that you are cool with that before using this tool!
+
 ## Running standalone
 Add env vars or system properties as desired.
 
@@ -17,6 +21,11 @@ After compiling, see `target/generated-resources/sql/ddl/auto/postgresql9.sql` f
 Insert a record into the `LTI_13_AUTHZ` table with your tool's registration_id (`lms_lti_canvasnotifier`), along with the client_id 
 and secret from Canvas's Developer Key.  An `env` designator is also required here, and allows a database to support 
 multiple environments simultaneously (dev and reg, for example).
+
+### Add authorized users and senders
+Add to the `CANVASNOTIFIER_USERS` table (either directly or via the rest endpoint) a record that maps to a user in your Canvas instance. 
+A user in this table can either be a user, sender, or both.  Setting the appropriate flags will determine what that user can do.
+
 
 ## Test a local launch
 Startup the application with the `LTI_CLIENTREGISTRATION_DEFAULTCLIENT` value set to `saltire`.
@@ -81,6 +90,20 @@ They can be set in a properties file, or overridden as environment variables.
 | `lms.db.driverClass` | JDBC Driver class name                                                        |
 | `lms.db.password`    | Password for the user accessing the database                                  |
 
+### Configure support contact information
+The following properties need to be set to configure the contact information on the global error page.
+They can be set in a security.properties file, or overridden as environment variables.
+
+| Property                | Description                                                                                               |
+|-------------------------|-----------------------------------------------------------------------------------------------------------|
+| `lti.errorcontact.name` | Display name for your support organization                                                                |
+| `lti.errorcontact.link` | Contact mechanism - URL or mailto:email (e.g. `http://support.school.edu` or `mailto:support@school.edu`) |
+
+### Configure recipients for job notifications
+| Property                                 | Description                                                                  |
+|------------------------------------------|------------------------------------------------------------------------------|
+| `canvasnotifier.batchNotificationEmail`  | Comma separated list of email addresses where job notifications will be sent |
+
 ### Denodo Configuration
 To enable the Denodo configuration, include the value `denodo` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
 The following properties need to be set to configure the communication with the Denodo database.
@@ -92,6 +115,17 @@ They can be set in a properties file, or overridden as environment variables.
 | `denodo.db.url`         | JDBC URL of the Denodo database.  Will have the form `jdbc:vdb://<host>:<port>/<database>` |
 | `denodo.db.user`        | Username used to access the Denodo database                                                |
 | `denodo.db.password`    | Password for the user accessing the Denodo database                                        |
+
+### Rabbit MQ Configuration
+Job processing happens in the background, via a RabbitMQ job.  Configuring the queue requires the following settings:
+
+| Property                          | Description                                                                                                           |
+|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| `lms.rabbitmq.address`            | Address of the Rabbit server, containing protocol, host, and port.  Will have the form `amqps://<host>:<port>`        |
+| `lms.rabbitmq.username`           | Username used to access the Rabbit server                                                                             |                                                                                                                      |
+| `lms.rabbitmq.password`           | Password for the user accessing the Rabbit server                                                                     |
+| `lms.rabbitmq.virtualHost`        | Virtual host of the Rabbit server.  Most likely `/`.                                                                  |
+| `lms.rabbitmq.queue_env_suffix`   | Environment specific queue suffix.  Allows for some "safety" if multiple instances run off of the same rabbit server. |
 
 ### Redis Configuration (optional)
 If you would like to use Redis for session storage, you will need to enable it by including the value `redis-session` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
