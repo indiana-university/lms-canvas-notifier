@@ -74,7 +74,8 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
+      SecurityContextHolder.getContext().setAuthentication(null);
       mvc.perform(get("/app/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON))
@@ -87,7 +88,7 @@ public class AppLaunchSecurityTest {
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
       mvc.perform(get("/app/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON))
@@ -96,7 +97,8 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void randomUrlNoAuth() throws Exception {
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
+      SecurityContextHolder.getContext().setAuthentication(null);
       mvc.perform(get("/asdf/foobar")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON))
@@ -108,7 +110,7 @@ public class AppLaunchSecurityTest {
       OidcAuthenticationToken token = TestUtils.buildToken("userId", "1234", LTIConstants.INSTRUCTOR_AUTHORITY);
       SecurityContextHolder.getContext().setAuthentication(token);
 
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
       mvc.perform(get("/asdf/foobar")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON))
