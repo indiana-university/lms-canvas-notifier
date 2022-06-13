@@ -61,7 +61,7 @@ public class CanvasNotifierUtils {
 
     /**
      * Replaces all occurances of %%variable%% in parameter body with the value specified in the parameter map
-     * @param lineMappedContents - Map of variable name, value.  map.get("var1") -> value 1
+     * @param lineMappedContents - Map of variable name, value.  map.get("var1") -&#62; value 1
      * @param body
      * @return - body %%variable%% replaced
      */
@@ -89,8 +89,8 @@ public class CanvasNotifierUtils {
      * Line 2 - you, orange
      *
      * if called with lineNumber=1:
-     * lineMappedContent.get("username") -> me
-     * lineMappedContent.get("fruit") -> apple
+     * lineMappedContent.get("username") -&#62; me
+     * lineMappedContent.get("fruit") -&#62; apple
      */
     public static Map<String, String> createCsvLineDataMap(List<String[]> csvContents, int lineNumber) {
         Map<String, String> lineMappedContent = new HashMap<>();
