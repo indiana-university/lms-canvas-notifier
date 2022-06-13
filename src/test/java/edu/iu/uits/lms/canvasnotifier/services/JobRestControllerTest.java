@@ -1,5 +1,38 @@
 package edu.iu.uits.lms.canvasnotifier.services;
 
+/*-
+ * #%L
+ * canvasnotifier
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
@@ -8,9 +41,9 @@ import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.JobRestController;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,7 +81,7 @@ public class JobRestControllerTest {
     @Mock
     private View view;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(jobRestController)
@@ -76,11 +109,11 @@ public class JobRestControllerTest {
 
         Job resultJob = new Gson().fromJson(resultJson, Job.class);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultJob);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJob);
 
-        Assert.assertEquals(job1.getId(), resultJob.getId());
-        Assert.assertEquals(job1.getSubject(), resultJob.getSubject());
+        Assertions.assertEquals(job1.getId(), resultJob.getId());
+        Assertions.assertEquals(job1.getSubject(), resultJob.getSubject());
     }
 
     @Test
@@ -111,16 +144,16 @@ public class JobRestControllerTest {
         Type customType = new TypeToken<ArrayList<Job>>(){}.getType();
         List<Job> resultJobsList = new Gson().fromJson(resultJson, customType);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultJobsList);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJobsList);
 
-        Assert.assertEquals(2, resultJobsList.size());
+        Assertions.assertEquals(2, resultJobsList.size());
 
-        Assert.assertEquals(job1.getId(), resultJobsList.get(0).getId());
-        Assert.assertEquals(job1.getSubject(), resultJobsList.get(0).getSubject());
+        Assertions.assertEquals(job1.getId(), resultJobsList.get(0).getId());
+        Assertions.assertEquals(job1.getSubject(), resultJobsList.get(0).getSubject());
 
-        Assert.assertEquals(job2.getId(), resultJobsList.get(1).getId());
-        Assert.assertEquals(job2.getSubject(), resultJobsList.get(1).getSubject());
+        Assertions.assertEquals(job2.getId(), resultJobsList.get(1).getId());
+        Assertions.assertEquals(job2.getSubject(), resultJobsList.get(1).getSubject());
     }
 
     @Test
@@ -139,7 +172,7 @@ public class JobRestControllerTest {
         job3.setId(3L);
         job3.setStatus(JobStatus.STARTED);
 
-        Assert.assertFalse(JobStatus.ABORTED.equals(job3.getStatus()));
+        Assertions.assertFalse(JobStatus.ABORTED.equals(job3.getStatus()));
 
 //        Mockito.when(jobRepository.findOne(job1.getId())).thenReturn(job1);
 //        Mockito.when(jobRepository.findOne(job2.getId())).thenReturn(job2);
@@ -157,9 +190,9 @@ public class JobRestControllerTest {
 
         String resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job is already aborted", resultJson);
+        Assertions.assertEquals("Job is already aborted", resultJson);
 
         mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/abort")
                 .contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -168,9 +201,9 @@ public class JobRestControllerTest {
 
         resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Cannot abort a finished job", resultJson);
+        Assertions.assertEquals("Cannot abort a finished job", resultJson);
 
         mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/abort")
                 .contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -179,9 +212,9 @@ public class JobRestControllerTest {
 
         resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job ABORTED", resultJson);
+        Assertions.assertEquals("Job ABORTED", resultJson);
 
         mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/4/abort")
                 .contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -190,9 +223,9 @@ public class JobRestControllerTest {
 
         resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job not found", resultJson);
+        Assertions.assertEquals("Job not found", resultJson);
     }
 
     @Test
@@ -200,7 +233,7 @@ public class JobRestControllerTest {
         Job job1 = new Job();
         job1.setId(1L);
 
-        Assert.assertFalse(JobStatus.ABORTED.equals(job1.getStatus()));
+        Assertions.assertFalse(JobStatus.ABORTED.equals(job1.getStatus()));
 
         Job job2 = new Job();
         job2.setId(2L);
@@ -220,9 +253,9 @@ public class JobRestControllerTest {
 
         String resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job #1 is not in an aborted state", resultJson);
+        Assertions.assertEquals("Job #1 is not in an aborted state", resultJson);
 
         mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/restart")
                 .contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -231,9 +264,9 @@ public class JobRestControllerTest {
 
         resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job #2 restarted", resultJson);
+        Assertions.assertEquals("Job #2 restarted", resultJson);
 
         mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/restart")
                 .contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -242,9 +275,9 @@ public class JobRestControllerTest {
 
         resultJson = mvcResult.getResponse().getContentAsString();
 
-        Assert.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultJson);
 
-        Assert.assertEquals("Job not found", resultJson);
+        Assertions.assertEquals("Job not found", resultJson);
     }
 
 }

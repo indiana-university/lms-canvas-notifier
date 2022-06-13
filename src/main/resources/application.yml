@@ -1,15 +1,9 @@
 spring:
   application:
     name: canvasnotifier
-  profiles:
-    active: redis
   session:
     store-type: none
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
+  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:email.properties, classpath:lti-registrations.properties, optional:classpath:denodo.properties,
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -26,10 +20,21 @@ spring:
           autoRegisterUserTypes: true
   datasource:
     driverClassName: ${lms.db.driverClass}
-    url: ${lms.db.url}
+    jdbcUrl: ${lms.db.url}
     username: ${lms.db.user}
     password: ${lms.db.password}
     type: org.springframework.jdbc.datasource.DriverManagerDataSource
+    denodo:
+      driverClassName: ${denodo.db.driverClass}
+      jdbcUrl: ${denodo.db.url}
+      username: ${denodo.db.user}
+      password: ${denodo.db.password}
+  cloud.vault.enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
   rabbitmq:
     addresses: ${lms.rabbitmq.address.${app.env}}
     username: ${lms.rabbitmq.username.${app.env}}
@@ -48,7 +53,7 @@ canvasnotifier:
   version: @app.version@
   env: ${app.env}
   batchNotificationEmail: iu-uits-es-ess-lms-notify@exchange.iu.edu,lms-func-l@iu.edu
-  canvasNotifierQueueName: notifier_${app.env}
+  canvasNotifierQueueName: notifier_${lms.rabbitmq.queue_env_suffix}
 server:
   error:
     whitelabel:
@@ -57,10 +62,38 @@ server:
     session:
       timeout: 30m
 
+app:
+  env: dev
+  fullFilePath: file:/usr/src/app/config
+  overridesFileName: overrides.properties
+
+management:
+  endpoint.info.enabled: true
+  endpoints.web.exposure.include: health,info
+  health.redis.enabled: false
+
 ---
 
 spring:
-  profiles: redis
+  config.activate.on-profile: redis-session
   session:
     store-type: redis
     redis.namespace: canvasnotifier-${app.version}:session
+management.health.redis.enabled: true
+
+---
+
+spring:
+  config:
+    activate.on-profile: vault
+    import: vault://
+  cloud.vault:
+    enabled: true
+    config:
+      lifecycle.lease-endpoints: sysleases
+    generic:
+      enabled: false
+    kv:
+      enabled: true
+      backend: ua-vpit/enterprise-systems/lms/kv
+      application-name: canvasnotifier

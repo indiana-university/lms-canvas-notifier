@@ -1,5 +1,38 @@
 package edu.iu.uits.lms.canvasnotifier.services;
 
+/*-
+ * #%L
+ * canvasnotifier
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
@@ -7,9 +40,9 @@ import edu.iu.uits.lms.canvasnotifier.model.Recipient;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.RecipientRestController;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -43,7 +76,7 @@ public class RecipientRestControllerTest {
     @Mock
     private View view;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(recipientRestController)
@@ -71,11 +104,11 @@ public class RecipientRestControllerTest {
 
         Recipient resultRecipient = new Gson().fromJson(resultJson, Recipient.class);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultRecipient);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultRecipient);
 
-        Assert.assertEquals(recipient1.getId(), resultRecipient.getId());
-        Assert.assertEquals(recipient1.getUsername(), resultRecipient.getUsername());
+        Assertions.assertEquals(recipient1.getId(), resultRecipient.getId());
+        Assertions.assertEquals(recipient1.getUsername(), resultRecipient.getUsername());
     }
 
     @Test
@@ -111,16 +144,16 @@ public class RecipientRestControllerTest {
         Type customType = new TypeToken<ArrayList<Recipient>>(){}.getType();
         List<Recipient> resultRecipientList = new Gson().fromJson(resultJson, customType);
 
-        Assert.assertNotNull(resultJson);
-        Assert.assertNotNull(resultRecipientList);
+        Assertions.assertNotNull(resultJson);
+        Assertions.assertNotNull(resultRecipientList);
 
-        Assert.assertEquals(2, resultRecipientList.size());
+        Assertions.assertEquals(2, resultRecipientList.size());
 
-        Assert.assertEquals(recipient1.getId(), resultRecipientList.get(0).getId());
-        Assert.assertEquals(recipient1.getUsername(), resultRecipientList.get(0).getUsername());
+        Assertions.assertEquals(recipient1.getId(), resultRecipientList.get(0).getId());
+        Assertions.assertEquals(recipient1.getUsername(), resultRecipientList.get(0).getUsername());
 
-        Assert.assertEquals(recipient2.getId(), resultRecipientList.get(1).getId());
-        Assert.assertEquals(recipient2.getUsername(), resultRecipientList.get(1).getUsername());
+        Assertions.assertEquals(recipient2.getId(), resultRecipientList.get(1).getId());
+        Assertions.assertEquals(recipient2.getUsername(), resultRecipientList.get(1).getUsername());
     }
 
 }

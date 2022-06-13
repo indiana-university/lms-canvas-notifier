@@ -1,10 +1,43 @@
 package edu.iu.uits.lms.canvasnotifier.services;
 
-import canvas.client.generated.api.AccountsApi;
-import canvas.client.generated.api.CanvasApi;
-import canvas.client.generated.api.ConversationsApi;
-import canvas.client.generated.api.UsersApi;
-import canvas.client.generated.model.User;
+/*-
+ * #%L
+ * canvasnotifier
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
+import edu.iu.uits.lms.canvas.model.User;
+import edu.iu.uits.lms.canvas.services.AccountService;
+import edu.iu.uits.lms.canvas.services.CanvasService;
+import edu.iu.uits.lms.canvas.services.ConversationService;
+import edu.iu.uits.lms.canvas.services.UserService;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.handler.JobResult;
 import edu.iu.uits.lms.canvasnotifier.handler.NotificationMessageHandler;
@@ -12,12 +45,12 @@ import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
-import email.client.generated.api.EmailApi;
-import iuonly.client.generated.api.CanvasDataApi;
+import edu.iu.uits.lms.email.service.EmailService;
+import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -35,22 +68,22 @@ public class NotificationMessageHandlerTest {
     private NotificationMessageHandler notificationMessageHandler;
 
     @Mock
-    private AccountsApi accountsApi;
+    private AccountService accountsApi;
 
     @Mock
-    private CanvasApi canvasApi;
+    private CanvasService canvasApi;
 
     @Mock
-    private CanvasDataApi canvasDataApi;
+    private CanvasDataServiceImpl canvasDataApi;
 
     @Mock
-    private ConversationsApi conversationsApi;
+    private ConversationService conversationsApi;
 
     @Mock
     private DataSource dataSource;
 
     @Mock
-    private EmailApi emailApi;
+    private EmailService emailApi;
 
     @Mock
     private JobRepository jobRepository;
@@ -65,13 +98,13 @@ public class NotificationMessageHandlerTest {
     private UserRepository userRepository;
 
     @Mock
-    private UsersApi usersApi;
+    private UserService usersApi;
 
     private final String[] recipients = new String[]{"senduser1", "senduser2", "senduser3", "senduser4"};
 
     private String jsonCsvString;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
@@ -92,8 +125,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "JobId can't be empty".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "JobId can't be empty".equals(em)));
     }
 
     @Test
@@ -103,8 +136,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Can't find jobId".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Can't find jobId".equals(em)));
     }
 
     @Test
@@ -122,8 +155,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No csv data found".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No csv data found".equals(em)));
     }
 
     @Test
@@ -142,8 +175,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No subject found".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No subject found".equals(em)));
     }
 
     @Test
@@ -163,8 +196,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No body found".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No body found".equals(em)));
     }
 
     @Test
@@ -185,8 +218,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No initiated by user found".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No initiated by user found".equals(em)));
     }
 
     @Test
@@ -209,8 +242,8 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in canvas".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in canvas".equals(em)));
     }
 
     @Test
@@ -238,9 +271,9 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in notifier database".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in notifier database".equals(em)));
     }
 
     @Test
@@ -273,9 +306,9 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user is not an authorized user".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user is not an authorized user".equals(em)));
     }
 
     @Test
@@ -308,9 +341,9 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No sender canvas id found".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No sender canvas id found".equals(em)));
     }
 
     @Test
@@ -345,9 +378,9 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user not found in canvas".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user not found in canvas".equals(em)));
     }
 
     @Test
@@ -388,10 +421,10 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertNotNull(jobResult.getCanvasSenderUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Send user not found in notifier database".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertNotNull(jobResult.getCanvasSenderUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Send user not found in notifier database".equals(em)));
     }
 
     @Test
@@ -436,10 +469,10 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertNotNull(jobResult.getCanvasSenderUser());
-        Assert.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user is not an authorized sending user".equals(em)));
+        Assertions.assertNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertNotNull(jobResult.getCanvasSenderUser());
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user is not an authorized sending user".equals(em)));
     }
 
     @Test
@@ -484,10 +517,10 @@ public class NotificationMessageHandlerTest {
 
         notificationMessageHandler.validateJob(jobResult);
 
-        Assert.assertNotNull(jobResult.getJob());
-        Assert.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assert.assertNotNull(jobResult.getCanvasSenderUser());
-        Assert.assertEquals(0, jobResult.getErrorMessages().size());
+        Assertions.assertNotNull(jobResult.getJob());
+        Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
+        Assertions.assertNotNull(jobResult.getCanvasSenderUser());
+        Assertions.assertEquals(0, jobResult.getErrorMessages().size());
     }
 
     @Test
@@ -505,14 +538,14 @@ public class NotificationMessageHandlerTest {
 
         List<String> recipientsListForCanvasData = notificationMessageHandler.getRecipientsListForCanvasData(csvContent);
 
-        Assert.assertNotEquals(csvContent.size(), recipientsListForCanvasData.size());
+        Assertions.assertNotEquals(csvContent.size(), recipientsListForCanvasData.size());
 
         // should not be header line nor the empty string line
-        Assert.assertEquals(csvContent.size() - 2, recipientsListForCanvasData.size());
+        Assertions.assertEquals(csvContent.size() - 2, recipientsListForCanvasData.size());
 
-        Assert.assertEquals(recipients[0], recipientsListForCanvasData.get(0));
-        Assert.assertEquals(recipients[1], recipientsListForCanvasData.get(1));
-        Assert.assertEquals(recipients[2], recipientsListForCanvasData.get(2));
-        Assert.assertEquals(recipients[3], recipientsListForCanvasData.get(3));
+        Assertions.assertEquals(recipients[0], recipientsListForCanvasData.get(0));
+        Assertions.assertEquals(recipients[1], recipientsListForCanvasData.get(1));
+        Assertions.assertEquals(recipients[2], recipientsListForCanvasData.get(2));
+        Assertions.assertEquals(recipients[3], recipientsListForCanvasData.get(3));
     }
 }
