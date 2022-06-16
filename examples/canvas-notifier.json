@@ -11,7 +11,6 @@
       "settings": {
         "placements": [
           {
-            "default": "disabled",
             "enabled": true,
             "placement": "account_navigation",
             "message_type": "LtiResourceLinkRequest"

@@ -36,7 +36,6 @@ package edu.iu.uits.lms.canvasnotifier.config;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
-import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
@@ -82,9 +81,6 @@ public class SecurityConfig {
 
         @Autowired
         private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
-
-        @Autowired
-        private LmsDefaultGrantedAuthoritiesMapper lmsDefaultGrantedAuthoritiesMapper;
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {

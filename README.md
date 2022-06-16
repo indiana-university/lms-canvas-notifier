@@ -116,6 +116,18 @@ They can be set in a properties file, or overridden as environment variables.
 | `denodo.db.user`        | Username used to access the Denodo database                                                |
 | `denodo.db.password`    | Password for the user accessing the Denodo database                                        |
 
+### Derdack Configuration
+To enable the Derdack configuration (only needed for the batch job), include the value `derdack` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
+The following properties need to be set to configure the communication with the Derdack API.
+They can be set in a properties file, or overridden as environment variables.
+
+| Property                  | Description                                                     |
+|---------------------------|-----------------------------------------------------------------|
+| `derdack.baseUrl`         | Base URL for the Derdack API endpoint                           |
+| `derdack.apiKey`          | API key fr the Derdack API                                      |
+| `derdack.team`            | ADS Group used to identify the team where notifications will go |
+| `derdack.recipientEmail`  | Email recipient used for non-critical notifications             |
+
 ### Rabbit MQ Configuration
 Job processing happens in the background, via a RabbitMQ job.  Configuring the queue requires the following settings:
 
