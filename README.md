@@ -106,7 +106,8 @@ They can be set in a security.properties file, or overridden as environment vari
 
 ### Denodo Configuration
 To enable the Denodo configuration, include the value `denodo` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
-The following properties need to be set to configure the communication with the Denodo database.
+The following properties need to be set to configure the communication with the Denodo database.  Make sure when you build with maven that you use the -P denodo parameter.
+Also, make sure if you run this locally in IntelliJ that you enable the denodo profile in the maven tab list of profiles.
 They can be set in a properties file, or overridden as environment variables.
 
 | Property                | Description                                                                                |
