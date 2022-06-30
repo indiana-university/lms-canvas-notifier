@@ -37,8 +37,12 @@ import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
+import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
+import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -49,9 +53,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,6 +74,9 @@ public class JobRestController {
 
     @Autowired
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public Job getJobFromId(@PathVariable Long id) {
@@ -178,5 +188,46 @@ public class JobRestController {
         canvasNotifierMessageSender.send(canvasNotifierMessage);
 
         return "Job #" + id + " restarted";
+    }
+
+    @RequestMapping(value = "/createphantomjobstarted", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public NotifierJobRestMessage createPhantomJobStarted(@RequestParam Long canvasSenderUserId) {
+        if (canvasSenderUserId == null) {
+            return new NotifierJobRestMessage("No canvas sender user id provided", null);
+        }
+
+        User user = userRepository.findByCanvasUserId(canvasSenderUserId.toString());
+
+        if (user == null) {
+            return new NotifierJobRestMessage(String.format("User not found with canvas sender user id %d provided",
+                    canvasSenderUserId), null);
+        }
+
+        if (! user.isAuthorizedSender()) {
+            return new NotifierJobRestMessage(String.format("Provided canvas sender user %d is not an authorized sender",
+                    canvasSenderUserId), null);
+        }
+
+        Job job = new Job();
+        job.setSender_canvasid(canvasSenderUserId.toString());
+        job.setSubject("PHANTOM SUBJECT");
+        job.setBody("PHANTOM BODY");
+        job.setJson_csv("PHANTOM CSV");
+        job.setStatus(JobStatus.STARTED);
+        job.setInitited_by_username("REST ENDPOINT");
+        job.setRecipients(new ArrayList<>());
+
+        job = jobRepository.save(job);
+
+        NotifierJobRestMessage notifierJobRestMessage = new NotifierJobRestMessage("Phantom job created", job);
+
+        return notifierJobRestMessage;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class NotifierJobRestMessage implements Serializable {
+        private String message;
+        private Job job;
     }
 }
