@@ -44,6 +44,18 @@ jQuery(document).ready(function($) {
 
      // this will prevent forms from submitting twice
      $('form').preventDoubleSubmission();
+
+     // loading indicators
+     $(".rvt-button").click(function() {
+        var btn = $(this);
+        var btnContent = btn.find(".button-content").first();
+        var btnLoader = btn.find(".rvt-loader").first();
+
+        btnContent.addClass("rvt-button__content");
+        btn.addClass("rvt-button--loading");
+        btn.attr("aria-busy", true);
+        btnLoader.removeClass("rvt-display-none");
+     })
 });
 
 // jQuery plugin to prevent double submission of forms
@@ -57,8 +69,6 @@ jQuery.fn.preventDoubleSubmission = function() {
         } else {
             // Mark it so that the next submit can be ignored
             $form.data('submitted', true);
-
-            $(".loading-inline").show();
 
             var buttons = $(':button');
 

@@ -41,38 +41,44 @@
     <title th:text="#{canvasnotifier.tool.title}"></title>
 </head>
 <body>
-<div layout:fragment="content" class="rvt-container" role="main">
+<div layout:fragment="content" class="rvt-container-xl" role="main">
     <form id="createNotifyForm" th:object="${canvasNotifierFormModel}" th:action="@{|/app/backorsend|}" method="post" enctype="multipart/form-data">
         <div class="rvt-grid">
             <div class="rvt-grid__item">
                 <h1 id="cnTitle" th:text="|#{canvasnotifier.tool.title} - Message Preview|" class="rvt-ts-32 rvt-m-bottom-xs"></h1>
-                <label class="cnLabel" for="msgUsername">Sender's Username:</label>
+                <label class="cnLabel rvt-label" for="msgUsername">Sender's Username:</label>
                 <input id="senderUserId" th:field="*{selectedSenderCanvasId}" type="hidden" class="" readonly />
-                <input id="msgUsername" th:field="*{selectedSenderDisplayName}" type="text" class="" readonly />
+                <input id="msgUsername" th:field="*{selectedSenderDisplayName}" type="text" class="rvt-text-input" readonly />
 
-                <label class="cnLabel rvt-m-top-md" for="msgSubject">Message Subject:</label>
-                <input id="msgSubject" th:field="*{subject}" type="text" class="" readonly />
+                <label class="cnLabel rvt-m-top-md rvt-label" for="msgSubject">Message Subject:</label>
+                <input id="msgSubject" th:field="*{subject}" type="text" class="rvt-text-input" readonly />
 
-                <label for="msgPreviewBody" class="cnLabel rvt-m-top-md">Message Body:</label>
+                <label for="msgPreviewBody" class="cnLabel rvt-m-top-md rvt-label">Message Body:</label>
                 <input type="hidden" id="msgBody" th:field="*{body}" class="" readonly />
-                <textarea type="text" id="msgPreviewBody" th:field="*{previewBody}" class="" readonly></textarea>
+                <textarea type="text" id="msgPreviewBody" th:field="*{previewBody}" class="rvt-textarea" readonly></textarea>
                 </textarea>
 
                 <input type="hidden" id="msgAttachmentText" th:field="*{CnAttachmentText}" class="" readonly />
 
                 <div class="rvt-alert rvt-alert--info rvt-m-top-md" role="alert" aria-labelledby="information-alert-title">
-                    <h2 class="rvt-alert__title" id="information-alert-title">Status message to be sent later</h2>
+                    <div class="rvt-alert__title" id="information-alert-title">Status message to be sent later</div>
                     <p class="rvt-alert__message">A status message will be sent to you later after you have submitted this form. It will contain any issues that may have been encountered during processing.</p>
                 </div>
 
                 <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-flex rvt-vertical-center">
-                    <div class="loading-inline hideMe">
+                    <div class="loading-inline rvt-display-none">
                         <div class="rvt-loader" aria-label="Content loading"></div>
                     </div>
                     <div id="submitSection">
                         <input id="action" name="action" value="" type="hidden" />
-                        <button id="returnButton" value="back" class="rvt-button rvt-button--secondary">Return</button>
-                        <button id="submitButton" value="send" class="rvt-button">Submit</button>
+                        <button id="returnButton" value="back" class="rvt-button rvt-button--secondary">
+                            <span class="button-content">Return</span>
+                            <div class="rvt-loader rvt-loader--xs rvt-display-none" aria-label="Content loading"></div>
+                        </button>
+                        <button id="submitButton" value="send" class="rvt-button">
+                            <span class="button-content">Submit</span>
+                            <div class="rvt-loader rvt-loader--xs rvt-display-none" aria-label="Content loading"></div>
+                        </button>
                     </div>
                 </div>
             </div>
