@@ -109,7 +109,7 @@ public class CanvasNotifierExpireElevationsService {
          emailDetails.setSubject(subject);
          emailDetails.setBody(resultsMessage);
          try {
-            emailService.sendEmail(emailDetails, true);
+            emailService.sendEmail(emailDetails);
          } catch (LmsEmailTooBigException | MessagingException e) {
             log.error("Error sending email", e);
          }

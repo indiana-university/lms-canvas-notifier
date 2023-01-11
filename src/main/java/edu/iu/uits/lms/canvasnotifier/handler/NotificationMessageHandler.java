@@ -570,7 +570,7 @@ public class NotificationMessageHandler {
         emailDetails.setBody(errorStringBuilder.toString());
 
         try {
-            emailService.sendEmail(emailDetails, true);
+            emailService.sendEmail(emailDetails);
         } catch (Exception e) {
             log.error("uh oh", e);
             return false;
