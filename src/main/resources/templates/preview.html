@@ -41,7 +41,7 @@
     <title th:text="#{canvasnotifier.tool.title}"></title>
 </head>
 <body>
-<div layout:fragment="content" class="rvt-container-xl" role="main">
+<div layout:fragment="content" class="rvt-container-xl" role="main" aria-labelledby="cnTitle">
     <form id="createNotifyForm" th:object="${canvasNotifierFormModel}" th:action="@{|/app/backorsend|}" method="post" enctype="multipart/form-data">
         <div class="rvt-grid">
             <div class="rvt-grid__item">
