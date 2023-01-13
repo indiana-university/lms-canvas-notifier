@@ -34,10 +34,6 @@
     font-size: 100%;
 }
 
-.hideMe {
-    display: none;
-}
-
 .loading-inline {
     opacity: 0.8;
 }
@@ -57,6 +53,5 @@
 }
 
 .recipients {
-    font-weight: bold;
     margin-bottom: 0.3rem;
 }
