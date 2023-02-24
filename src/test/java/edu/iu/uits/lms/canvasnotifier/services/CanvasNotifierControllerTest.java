@@ -38,7 +38,7 @@ import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.service.TestUtils;
+import edu.iu.uits.lms.lti.config.TestUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
