@@ -76,7 +76,7 @@
         <jquery.version>3.5.1</jquery.version>
         <lms-canvas-rivet.version>5.2.2.0_1</lms-canvas-rivet.version>
         <lms-embedded-services.version>5.2.0</lms-embedded-services.version>
-        <lms-team-spring-boot-it12>4.7-SNAPSHOT</lms-team-spring-boot-it12>
+        <lms-team-spring-boot-it12>4.7</lms-team-spring-boot-it12>
         <nimbus-jose-jwt.version>9.10.1</nimbus-jose-jwt.version>
 <!--        <springdoc-openapi-ui.version>1.6.7</springdoc-openapi-ui.version>-->
         <opencsv.version>5.3</opencsv.version>
