@@ -38,8 +38,9 @@ import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.service.TestUtils;
+import edu.iu.uits.lms.lti.config.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -71,6 +72,9 @@ public class AppLaunchSecurityTest {
 
    @MockBean
    private UserRepository userRepository;
+
+   @MockBean
+   private SisServiceImpl sisService;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
