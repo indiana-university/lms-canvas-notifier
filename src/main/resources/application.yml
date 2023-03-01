@@ -68,8 +68,9 @@ app:
 
 management:
   endpoint.info.enabled: true
-  endpoints.web.exposure.include: health,info
+  endpoints.web.exposure.include: health,lms
   health.redis.enabled: false
+  info.java.enabled: true
 
 ---
 
