@@ -49,19 +49,14 @@ import java.io.IOException;
 @Profile("canvasnotifierexpireelevations")
 public class CanvasNotifierExpireElevationsJob implements BatchJob {
 
+    @Autowired
     private CanvasNotifierExpireElevationsService canvasNotifierExpireElevationService;
+
+    @Autowired
     private ConfigurableApplicationContext ctx;
 
     @Autowired
-    private CanvasNotifierExpireElevationsJob job;
-
-    @Autowired
     private ErrorContactServiceImpl errorContactService;
-
-    public CanvasNotifierExpireElevationsJob(CanvasNotifierExpireElevationsService canvasNotifierExpireElevationService, ConfigurableApplicationContext ctx) {
-        this.canvasNotifierExpireElevationService = canvasNotifierExpireElevationService;
-        this.ctx = ctx;
-    }
 
     private void expireElevations() throws IOException {
         log.info("CanvasNotifierExpireElevations job running!");
@@ -72,7 +67,7 @@ public class CanvasNotifierExpireElevationsJob implements BatchJob {
     public void run() {
 
         try {
-            job.expireElevations();
+            expireElevations();
         } catch (Exception e) {
             log.error("Caught exception performing CanvasNotifierExpireElevations job", e);
 
