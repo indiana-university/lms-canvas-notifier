@@ -36,6 +36,7 @@ package edu.iu.uits.lms.canvasnotifier.services.swagger;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageListener;
 import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
+import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -43,6 +44,9 @@ import javax.sql.DataSource;
 
 @TestConfiguration
 public class SwaggerNotifierTestConfig {
+    @MockBean
+    private BufferingApplicationStartup bufferingApplicationStartup;
+
     @MockBean
     private CanvasDataServiceImpl canvasDataService;
 

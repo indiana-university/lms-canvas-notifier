@@ -49,9 +49,6 @@ import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOMREST_PROFILE;
 @SpringBootTest(classes = {WebApplication.class, SecurityConfig.class, SwaggerNotifierTestConfig.class})
 @ActiveProfiles({EMAILREST_PROFILE, IUCUSTOMREST_PROFILE})
 public class SwaggerEmbeddedToolTest extends AbstractSwaggerEmbeddedToolTest {
-   @MockBean
-   private BufferingApplicationStartup bufferingApplicationStartup;
-
    @Override
    protected List<String> getEmbeddedSwaggerToolPaths() {
       return SwaggerTestUtil.getEmbeddedSwaggerToolPaths(super.getEmbeddedSwaggerToolPaths());

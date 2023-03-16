@@ -44,9 +44,6 @@ import java.util.List;
 
 @SpringBootTest(classes = {WebApplication.class, SecurityConfig.class, SwaggerNotifierTestConfig.class})
 public class SwaggerCustomTest extends AbstractSwaggerCustomTest {
-   @MockBean
-   private BufferingApplicationStartup bufferingApplicationStartup;
-
    @Override
    protected List<String> getEmbeddedSwaggerToolPaths() {
       return SwaggerTestUtil.getEmbeddedSwaggerToolPaths(super.getEmbeddedSwaggerToolPaths());
