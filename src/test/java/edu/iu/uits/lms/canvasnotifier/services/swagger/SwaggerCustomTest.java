@@ -42,7 +42,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 
-@SpringBootTest(classes = {WebApplication.class, SecurityConfig.class})
+@SpringBootTest(classes = {WebApplication.class, SecurityConfig.class, SwaggerNotifierTestConfig.class})
 public class SwaggerCustomTest extends AbstractSwaggerCustomTest {
    @MockBean
    private BufferingApplicationStartup bufferingApplicationStartup;
