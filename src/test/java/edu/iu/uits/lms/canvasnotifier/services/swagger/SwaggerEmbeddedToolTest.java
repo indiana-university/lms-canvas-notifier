@@ -43,10 +43,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static edu.iu.uits.lms.email.EmailConstants.EMAILREST_PROFILE;
 import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOMREST_PROFILE;
 
 @SpringBootTest(classes = {WebApplication.class, SecurityConfig.class, SwaggerNotifierTestConfig.class})
-@ActiveProfiles({IUCUSTOMREST_PROFILE})
+@ActiveProfiles({EMAILREST_PROFILE, IUCUSTOMREST_PROFILE})
 public class SwaggerEmbeddedToolTest extends AbstractSwaggerEmbeddedToolTest {
    @MockBean
    private BufferingApplicationStartup bufferingApplicationStartup;
