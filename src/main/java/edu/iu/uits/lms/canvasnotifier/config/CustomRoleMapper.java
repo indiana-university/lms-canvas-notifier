@@ -35,6 +35,7 @@ package edu.iu.uits.lms.canvasnotifier.config;
 
 import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
 import edu.iu.uits.lms.lti.service.OidcTokenUtils;
@@ -73,7 +74,7 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
          User user = userRepository.findByUsername(userId);
 
          if (user != null && user.isAuthorizedUser()) {
-            rolesString = "Instructor";
+            rolesString = LTIConstants.CANVAS_INSTRUCTOR_ROLE;
          }
 
          String[] userRoles = rolesString.split(",");
