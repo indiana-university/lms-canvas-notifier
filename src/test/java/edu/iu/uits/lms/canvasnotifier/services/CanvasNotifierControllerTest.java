@@ -97,8 +97,8 @@ public class CanvasNotifierControllerTest {
         MockitoAnnotations.initMocks(this);
 
         //setup lti token
-        List authoritiesList = Arrays.asList(new SimpleGrantedAuthority("Instructor"),
-                new SimpleGrantedAuthority("ROLE_LTI_INSTRUCTOR"));
+        List authoritiesList = Arrays.asList(new SimpleGrantedAuthority(LTIConstants.CANVAS_INSTRUCTOR_ROLE),
+                new SimpleGrantedAuthority(LTIConstants.INSTRUCTOR_AUTHORITY));
 
 //        final LtiAuthenticationToken ltiAuthenticationToken = new LtiAuthenticationToken("user1",
 //                ID,
