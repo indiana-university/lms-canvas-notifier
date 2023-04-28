@@ -34,6 +34,7 @@ package edu.iu.uits.lms.canvasnotifier.config;
  */
 
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.common.it12logging.LmsFilterSecurityInterceptorObjectPostProcessor;
 import edu.iu.uits.lms.common.it12logging.RestSecurityLoggingConfig;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
@@ -41,10 +42,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import uk.ac.ox.ctl.lti13.Lti13Configurer;
 
 import static edu.iu.uits.lms.lti.LTIConstants.BASE_USER_ROLE;
@@ -62,6 +65,8 @@ public class SecurityConfig {
             http.requestMatchers().antMatchers("/rest/**", "/api/**")
                     .and()
                     .authorizeRequests()
+                    // In order to allow CORS preflight requests to succeed, we need to allow OPTIONS requests to the token endpoint
+                    .antMatchers(HttpMethod.OPTIONS, "/rest/**").permitAll()
                     .antMatchers("/rest/**")
                     .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
                     .antMatchers("/api/**").permitAll()
@@ -93,7 +98,14 @@ public class SecurityConfig {
                   .and()
                   .authorizeRequests()
                   .antMatchers(WELL_KNOWN_ALL, "/error").permitAll()
-                  .antMatchers("/**").hasRole(BASE_USER_ROLE);
+                  .antMatchers("/**").hasRole(BASE_USER_ROLE)
+                  .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
+                  .and()
+                  .headers()
+                  .contentSecurityPolicy("style-src 'self'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
+                  .and()
+                  .referrerPolicy(referrer -> referrer
+                          .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
 
             //Setup the LTI handshake
             Lti13Configurer lti13Configurer = new Lti13Configurer()
@@ -105,7 +117,14 @@ public class SecurityConfig {
             http.requestMatchers().antMatchers("/**")
                   .and()
                   .authorizeRequests()
-                  .anyRequest().authenticated();
+                  .anyRequest().authenticated()
+                  .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
+                  .and()
+                  .headers()
+                  .contentSecurityPolicy("style-src 'self'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
+                  .and()
+                  .referrerPolicy(referrer -> referrer
+                          .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
 
             http.exceptionHandling().accessDeniedPage("/accessDenied");
         }
