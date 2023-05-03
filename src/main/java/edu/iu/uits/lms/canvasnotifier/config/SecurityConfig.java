@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -62,11 +61,10 @@ public class SecurityConfig {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.requestMatchers().antMatchers("/rest/**", "/api/**")
+            http.cors().and()
+                    .requestMatchers().antMatchers("/rest/**", "/api/**")
                     .and()
                     .authorizeRequests()
-                    // In order to allow CORS preflight requests to succeed, we need to allow OPTIONS requests to the token endpoint
-                    .antMatchers(HttpMethod.OPTIONS, "/rest/**").permitAll()
                     .antMatchers("/rest/**")
                     .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
                     .antMatchers("/api/**").permitAll()

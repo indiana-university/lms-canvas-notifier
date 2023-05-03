@@ -75,7 +75,7 @@
         <java.version>17</java.version>
         <jquery.version>3.6.4</jquery.version>
         <lms-canvas-rivet.version>5.2.2.0_1</lms-canvas-rivet.version>
-        <lms-embedded-services.version>5.2.5</lms-embedded-services.version>
+        <lms-embedded-services.version>5.2.7</lms-embedded-services.version>
         <lms-team-spring-boot-it12>4.8</lms-team-spring-boot-it12>
         <opencsv.version>5.7.1</opencsv.version>
         <spring-cloud-starter-parent.version>2021.0.7</spring-cloud-starter-parent.version>
@@ -89,7 +89,7 @@
         <plugins.license.version>2.0.0</plugins.license.version>
         <plugins.nexus-staging.version>1.6.13</plugins.nexus-staging.version>
         <plugins.release.version>3.0.0</plugins.release.version>
-        <plugins.source.version>3.3.1</plugins.source.version>
+        <plugins.source.version>3.2.1</plugins.source.version>
         <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
     </properties>
 
