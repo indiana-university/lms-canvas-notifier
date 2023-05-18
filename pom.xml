@@ -74,7 +74,7 @@
         <jodatime-version>2.12.5</jodatime-version>
         <java.version>17</java.version>
         <jquery.version>3.6.4</jquery.version>
-        <lms-canvas-rivet.version>5.2.2.0_1</lms-canvas-rivet.version>
+        <lms-canvas-rivet.version>5.2.4.0</lms-canvas-rivet.version>
         <lms-embedded-services.version>5.2.7</lms-embedded-services.version>
         <lms-team-spring-boot-it12>4.8</lms-team-spring-boot-it12>
         <opencsv.version>5.7.1</opencsv.version>
