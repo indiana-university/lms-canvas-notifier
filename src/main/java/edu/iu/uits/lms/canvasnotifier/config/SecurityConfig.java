@@ -123,8 +123,6 @@ public class SecurityConfig {
                   .and()
                   .referrerPolicy(referrer -> referrer
                           .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
-
-            http.exceptionHandling().accessDeniedPage("/accessDenied");
         }
 
         @Override

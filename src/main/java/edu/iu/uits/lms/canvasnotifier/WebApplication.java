@@ -57,7 +57,7 @@ import org.springframework.context.annotation.PropertySource;
 import java.util.Date;
 
 @SpringBootApplication
-@EnableGlobalErrorHandler(accessDeniedViewName = "accessDenied")
+@EnableGlobalErrorHandler
 @EnableBatch
 @PropertySource(value = {"classpath:env.properties",
       "${app.fullFilePath}/security.properties"}, ignoreResourceNotFound = true)
