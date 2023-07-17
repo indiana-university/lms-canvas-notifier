@@ -100,7 +100,7 @@ public class SecurityConfig {
                   .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
                   .and()
                   .headers()
-                  .contentSecurityPolicy("style-src 'self'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
+                  .contentSecurityPolicy("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
                   .and()
                   .referrerPolicy(referrer -> referrer
                           .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
@@ -119,12 +119,10 @@ public class SecurityConfig {
                   .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
                   .and()
                   .headers()
-                  .contentSecurityPolicy("style-src 'self'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
+                  .contentSecurityPolicy("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com")
                   .and()
                   .referrerPolicy(referrer -> referrer
                           .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
-
-            http.exceptionHandling().accessDeniedPage("/accessDenied");
         }
 
         @Override

@@ -79,11 +79,6 @@ public class CanvasNotifierController extends OidcTokenAwareController {
     @Autowired
     private UserRepository userRepository;
 
-    @RequestMapping(value = "/accessDenied")
-    public String accessDenied() {
-        return "accessDenied";
-    }
-
     @RequestMapping({"/launch", "/main"})
     @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
     public String main(Model model, CanvasNotifierFormModel canvasNotifierFormModel) {
