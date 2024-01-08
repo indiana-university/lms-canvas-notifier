@@ -33,7 +33,9 @@ package edu.iu.uits.lms.canvasnotifier.config;
  * #L%
  */
 
+import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,5 +49,12 @@ public class RabbitConfig {
    @Bean(name = "canvasNotifierQueue")
    Queue canvasNotifierQueue() {
       return new Queue(toolConfig.getCanvasNotifierQueueName());
+   }
+
+   @Bean
+   public SimpleMessageConverter converter() {
+      SimpleMessageConverter converter = new SimpleMessageConverter();
+      converter.addAllowedListPatterns(CanvasNotifierMessage.class.getName());
+      return converter;
    }
 }
