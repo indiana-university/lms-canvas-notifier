@@ -59,11 +59,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -83,13 +90,9 @@ public class JobRestController {
 
     @GetMapping("/getit")
     public String getIt() {
-        String answer = "";
-
         final String filePath = "/var/run/secrets/kubernetes.io/serviceaccount";
-
-        File directory = new File(filePath);
-
-        StringBuilder stringBuilder = new StringBuilder();
+        final File directory = new File(filePath);
+        final StringBuilder directoryListingStringBuilder = new StringBuilder();
 
         if (directory.isDirectory()) {
             File[] files = directory.listFiles();
@@ -97,19 +100,45 @@ public class JobRestController {
             if (files != null) {
                 Arrays.sort(files, Comparator.comparing((File::getName)));
 
-                for (File file : files) {
-                    stringBuilder.append(String.format("%s", file.getName()));
+                int maxFileSizeStringLength = 0;
 
-                    if (file.isDirectory()) {
-                        stringBuilder.append("/\n");
-                    } else {
-                        stringBuilder.append("\n");
+                for (File file: files) {
+                    int fileSizeStringlength = String.format("%d", file.length()).length();
+
+                    if (fileSizeStringlength > maxFileSizeStringLength) {
+                        maxFileSizeStringLength = fileSizeStringlength;
+                    }
+                }
+
+                final String fileSizeStringFormat = String.format("%%1$%ds", maxFileSizeStringLength);
+
+                for (File file : files) {
+                    try {
+                        directoryListingStringBuilder.append(file.isDirectory() ? "d" : "-");
+
+                        PosixFileAttributeView posixFileAttributeView =
+                                Files.getFileAttributeView(file.getAbsoluteFile().toPath(),
+                                PosixFileAttributeView.class);
+                        PosixFileAttributes posixFileAttributes = posixFileAttributeView.readAttributes();
+                        Set<PosixFilePermission> posixFilePermisisons = posixFileAttributes.permissions();
+
+                        directoryListingStringBuilder.append(PosixFilePermissions.toString(posixFilePermisisons));
+                        directoryListingStringBuilder.append(String.format(" %s %s %s %s %s",
+                                posixFileAttributes.owner().getName(),
+                                posixFileAttributes.group().getName(),
+                                String.format(fileSizeStringFormat, posixFileAttributes.size()),
+                                posixFileAttributes.lastModifiedTime().toString().substring(0, 19),
+                                file.isDirectory() ? file.getName() + "/" : file.getName()));
+
+                        directoryListingStringBuilder.append("\n");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
         }
 
-        return stringBuilder.toString();
+        return directoryListingStringBuilder.toString();
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
