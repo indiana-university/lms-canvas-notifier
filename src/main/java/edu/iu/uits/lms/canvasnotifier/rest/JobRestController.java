@@ -50,6 +50,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -57,8 +58,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,6 +80,37 @@ public class JobRestController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @GetMapping("/getit")
+    public String getIt() {
+        String answer = "";
+
+        final String filePath = "/var/run/secrets/kubernetes.io/serviceaccount";
+
+        File directory = new File(filePath);
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+
+            if (files != null) {
+                Arrays.sort(files, Comparator.comparing((File::getName)));
+
+                for (File file : files) {
+                    stringBuilder.append(String.format("%s", file.getName()));
+
+                    if (file.isDirectory()) {
+                        stringBuilder.append("/\n");
+                    } else {
+                        stringBuilder.append("\n");
+                    }
+                }
+            }
+        }
+
+        return stringBuilder.toString();
+    }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public Job getJobFromId(@PathVariable Long id) {
