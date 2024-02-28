@@ -102,7 +102,7 @@ public class JobRestController {
             log.error("Error: " + e.getMessage());
         }
 
-        final String url = "https://vault-test.uits.iu.edu/v1/auth/kubernetes/login";
+        final String url = "https://vault-test.uits.iu.edu/v1/auth/kubernetes/login:8200";
         final String role = "ua-vpit--enterprise-systems--lms--canvasnotifier-reg";
 
         String jsonBody = String.format("{\"jwt\": \"%s\", \"role\": \"%s\"}",
