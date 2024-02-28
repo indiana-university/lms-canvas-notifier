@@ -46,6 +46,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,12 +57,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
@@ -87,6 +90,37 @@ public class JobRestController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @GetMapping("/getit2")
+    public void getIt2() {
+        final String filePath = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+        String jwtToken = null;
+
+        try {
+            jwtToken = new String(Files.readAllBytes(Paths.get(filePath)));
+        } catch (IOException e) {
+            log.error("Error: " + e.getMessage());
+        }
+
+        final String url = "https://vault-test.uits.iu.edu/v1/auth/kubernetes/login";
+        final String role = "ua-vpit--enterprise-systems--lms--canvasnotifier-reg";
+
+        String jsonBody = String.format("{\"jwt\": \"%s\", \"role\": \"%s\"}",
+                jwtToken, role);
+
+        log.info("JSON body = {}", jsonBody);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+        log.info("ResponseCode = {}, ResponseBody = {}", response.getStatusCodeValue(), response.getBody());
+    }
+
 
     @GetMapping("/getit")
     public String getIt() {
