@@ -91,7 +91,20 @@ public class JobRestController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/getit2")
+    @GetMapping("/getit3")
+    public String getIt3() {
+        final String filePath = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+        String jwtToken = null;
+
+        try {
+            jwtToken = new String(Files.readAllBytes(Paths.get(filePath)));
+        } catch (IOException e) {
+            log.error("Error: " + e.getMessage());
+        }
+
+        return jwtToken;
+    }
+        @GetMapping("/getit2")
     public void getIt2() {
         final String filePath = "/var/run/secrets/kubernetes.io/serviceaccount/token";
         String jwtToken = null;
@@ -102,7 +115,7 @@ public class JobRestController {
             log.error("Error: " + e.getMessage());
         }
 
-        final String url = "https://vault-test.uits.iu.edu/v1/auth/kubernetes/login:8200";
+        final String url = "https://vault-test.uits.iu.edu/v1/auth/kubernetes/login";
         final String role = "ua-vpit--enterprise-systems--lms--canvasnotifier-reg";
 
         String jsonBody = String.format("{\"jwt\": \"%s\", \"role\": \"%s\"}",
