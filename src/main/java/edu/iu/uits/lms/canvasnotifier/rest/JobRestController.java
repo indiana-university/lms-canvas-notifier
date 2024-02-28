@@ -110,15 +110,20 @@ public class JobRestController {
 
         log.info("JSON body = {}", jsonBody);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("X-Vault-Namespace", "ua-vpit--enterprise-systems--lms");
 
-        HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
+            HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-        log.info("ResponseCode = {}, ResponseBody = {}", response.getStatusCodeValue(), response.getBody());
+            log.info("ResponseCode = {}, ResponseBody = {}", response.getStatusCodeValue(), response.getBody());
+        } catch (Exception e) {
+            log.error("Error:", e);
+        }
     }
 
 
