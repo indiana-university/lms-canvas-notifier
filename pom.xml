@@ -55,24 +55,24 @@
     <properties>
         <app.version>${project.version}</app.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-io.version>2.15.1</commons-io.version>
+        <commons-io.version>2.16.1</commons-io.version>
         <denodo-jdbc.version>8.0.2</denodo-jdbc.version>
         <denodo-hibernate-dialect.version>8.0.20201021</denodo-hibernate-dialect.version>
-        <jodatime-version>2.12.5</jodatime-version>
+        <jodatime-version>2.12.7</jodatime-version>
         <java.version>17</java.version>
         <jquery.version>3.7.1</jquery.version>
-        <lms-canvas-rivet.version>5.2.5.2_2</lms-canvas-rivet.version>
-        <lms-embedded-services.version>5.2.30</lms-embedded-services.version>
-        <lms-team-spring-boot-it12>4.8</lms-team-spring-boot-it12>
+        <lms-canvas-rivet.version>5.2.6.0</lms-canvas-rivet.version>
+        <lms-embedded-services.version>5.2.35</lms-embedded-services.version>
+        <lms-team-spring-boot-it12>5.4.7</lms-team-spring-boot-it12>
         <opencsv.version>5.9</opencsv.version>
         <spring-cloud-starter-parent.version>2021.0.9</spring-cloud-starter-parent.version>
-        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
-        <webjars-locator.version>0.50</webjars-locator.version>
+        <springdoc-openapi-ui.version>1.8.0</springdoc-openapi-ui.version>
+        <webjars-locator.version>0.52</webjars-locator.version>
 
-        <git-commit-id-maven-plugin.version>6.0.0</git-commit-id-maven-plugin.version>
+        <git-commit-id-maven-plugin.version>8.0.2</git-commit-id-maven-plugin.version>
         <hibernate5-ddl-maven-plugin.version>2.5.0</hibernate5-ddl-maven-plugin.version>
-        <plugins.compiler.version>3.11.0</plugins.compiler.version>
-        <plugins.license.version>2.2.0</plugins.license.version>
+        <plugins.compiler.version>3.13.0</plugins.compiler.version>
+        <plugins.license.version>2.4.0</plugins.license.version>
         <plugins.release.version>3.0.1</plugins.release.version>
     </properties>
 
