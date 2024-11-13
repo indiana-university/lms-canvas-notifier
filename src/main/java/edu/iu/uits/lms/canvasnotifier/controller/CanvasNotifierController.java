@@ -91,8 +91,6 @@ public class CanvasNotifierController extends OidcTokenAwareController {
         userList.add(pickOptionDummyUser);
         userList.addAll(userRepository.findAllAuthorizedSenders());
 
-        userList.sort(Comparator.comparing(User::getId));
-
         canvasNotifierFormModel.setUserList(userList);
 
         model.addAttribute("canvasNotifierFormModel", canvasNotifierFormModel);

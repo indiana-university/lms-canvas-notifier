@@ -51,8 +51,8 @@ import java.io.Serializable;
 @NamedQueries({
         @NamedQuery(name = "User.findByUsername", query = "from User where username = :username"),
         @NamedQuery(name = "User.findByCanvasUserId", query = "from User where canvas_user_id = :canvasUserId"),
-        @NamedQuery(name = "User.findAllAuthorizedSenders", query = "from User where authorizedSender = true order by username asc"),
-        @NamedQuery(name = "User.findAllAuthorizedUsers", query = "from User where authorizedUser = true order by username asc")
+        @NamedQuery(name = "User.findAllAuthorizedSenders", query = "from User where authorizedSender = true order by display_name asc"),
+        @NamedQuery(name = "User.findAllAuthorizedUsers", query = "from User where authorizedUser = true order by display_name asc")
 })
 
 @SequenceGenerator(name = "CANVASNOTIFIER_USERS_ID_SEQ", sequenceName = "CANVASNOTIFIER_USERS_ID_SEQ", allocationSize = 1)
