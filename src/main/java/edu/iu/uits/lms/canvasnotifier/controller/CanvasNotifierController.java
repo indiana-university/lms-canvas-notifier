@@ -61,7 +61,6 @@ import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenti
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +89,6 @@ public class CanvasNotifierController extends OidcTokenAwareController {
 
         userList.add(pickOptionDummyUser);
         userList.addAll(userRepository.findAllAuthorizedSenders());
-
-        userList.sort(Comparator.comparing(User::getId));
 
         canvasNotifierFormModel.setUserList(userList);
 
