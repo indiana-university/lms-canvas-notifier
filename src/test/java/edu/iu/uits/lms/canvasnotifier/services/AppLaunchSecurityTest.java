@@ -62,7 +62,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CanvasNotifierController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-//@Import(ToolConfig.class)
 @ContextConfiguration(classes = {ToolConfig.class, CanvasNotifierController.class, SecurityConfig.class})
 @ActiveProfiles("none")
 public class AppLaunchSecurityTest {
