@@ -33,17 +33,19 @@
 // * #L%
 // */
 //
-//import java.util.ArrayList;
+//import edu.iu.uits.lms.canvasnotifier.WebApplication;
+//import edu.iu.uits.lms.canvasnotifier.config.SecurityConfig;
+//import edu.iu.uits.lms.lti.swagger.AbstractSwaggerCustomTest;
+//import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+//
 //import java.util.List;
 //
-//import static edu.iu.uits.lms.email.EmailConstants.EMAIL_GROUP_CODE_PATH;
-//import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOM_GROUP_CODE_PATH;
-//
-//public class SwaggerTestUtil {
-//    protected static  List<String> getEmbeddedSwaggerToolPaths(List<String> baseList) {
-//        List<String> expandedList = new ArrayList<>(baseList);
-//        expandedList.add(EMAIL_GROUP_CODE_PATH);
-//        expandedList.add(IUCUSTOM_GROUP_CODE_PATH);
-//        return expandedList;
+//@SpringBootTest(classes = {WebApplication.class, SecurityConfig.class, SwaggerNotifierTestConfig.class})
+//public class SwaggerTempTest extends AbstractSwaggerCustomTest {
+//    @Override
+//    protected List<String> getEmbeddedSwaggerToolPaths() {
+//        return SwaggerTestUtil.getEmbeddedSwaggerToolPaths(super.getEmbeddedSwaggerToolPaths());
 //    }
 //}

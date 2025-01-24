@@ -33,26 +33,26 @@ package edu.iu.uits.lms.canvasnotifier.model;
  * #L%
  */
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "CANVASNOTIFIER_USERS")
 @NamedQueries({
         @NamedQuery(name = "User.findByUsername", query = "from User where username = :username"),
-        @NamedQuery(name = "User.findByCanvasUserId", query = "from User where canvas_user_id = :canvasUserId"),
-        @NamedQuery(name = "User.findAllAuthorizedSenders", query = "from User where authorizedSender = true order by display_name asc"),
-        @NamedQuery(name = "User.findAllAuthorizedUsers", query = "from User where authorizedUser = true order by display_name asc")
+        @NamedQuery(name = "User.findByCanvasUserId", query = "from User where canvasUserId = :canvasUserId"),
+        @NamedQuery(name = "User.findAllAuthorizedSenders", query = "from User where authorizedSender = true order by displayName asc"),
+        @NamedQuery(name = "User.findAllAuthorizedUsers", query = "from User where authorizedUser = true order by displayName asc")
 })
 
 @SequenceGenerator(name = "CANVASNOTIFIER_USERS_ID_SEQ", sequenceName = "CANVASNOTIFIER_USERS_ID_SEQ", allocationSize = 1)

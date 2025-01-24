@@ -9,11 +9,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.2.12</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <version>5.0.12-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <description>Allows authorized users to send Canvas messages to users in bulk.</description>
     <url>https://github.com/indiana-university/lms-canvas-notifier</url>
     <inceptionYear>2015</inceptionYear>
@@ -55,25 +55,25 @@
     <properties>
         <app.version>${project.version}</app.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-io.version>2.16.1</commons-io.version>
-        <denodo-jdbc.version>8.0.2</denodo-jdbc.version>
-        <denodo-hibernate-dialect.version>8.0.20201021</denodo-hibernate-dialect.version>
-        <jodatime-version>2.12.7</jodatime-version>
-        <java.version>17</java.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <denodo-jdbc.version>9.1.0</denodo-jdbc.version>
+        <denodo-hibernate-dialect.version>9.0.20240513</denodo-hibernate-dialect.version>
+        <jodatime-version>2.13.0</jodatime-version>
+        <java.version>21</java.version>
         <jquery.version>3.7.1</jquery.version>
-        <lms-canvas-rivet.version>5.2.7.0_1</lms-canvas-rivet.version>
-        <lms-embedded-services.version>5.2.35</lms-embedded-services.version>
-        <lms-team-spring-boot-it12>5.4.7</lms-team-spring-boot-it12>
-        <opencsv.version>5.9</opencsv.version>
-        <spring-cloud-starter-parent.version>2021.0.9</spring-cloud-starter-parent.version>
-        <springdoc-openapi-ui.version>1.8.0</springdoc-openapi-ui.version>
+        <lms-canvas-rivet.version>6.2.8.1_1</lms-canvas-rivet.version>
+        <lms-embedded-services.version>6.0.9</lms-embedded-services.version>
+        <lms-team-spring-boot-it12>6.5.0</lms-team-spring-boot-it12>
+        <opencsv.version>5.10</opencsv.version>
+        <spring-cloud-starter-parent.version>2023.0.5</spring-cloud-starter-parent.version>
+        <springdoc-openapi-ui.version>2.5.0</springdoc-openapi-ui.version>
         <webjars-locator.version>0.52</webjars-locator.version>
 
-        <git-commit-id-maven-plugin.version>8.0.2</git-commit-id-maven-plugin.version>
+        <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
         <hibernate5-ddl-maven-plugin.version>2.5.0</hibernate5-ddl-maven-plugin.version>
         <plugins.compiler.version>3.13.0</plugins.compiler.version>
-        <plugins.license.version>2.4.0</plugins.license.version>
-        <plugins.release.version>3.0.1</plugins.release.version>
+        <plugins.license.version>2.5.0</plugins.license.version>
+        <plugins.release.version>3.1.1</plugins.release.version>
     </properties>
 
     <dependencyManagement>
@@ -122,7 +122,7 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId> springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi-ui.version}</version>
         </dependency>
         <dependency>
@@ -172,10 +172,6 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.security.oauth.boot</groupId>-->
-<!--            <artifactId>spring-security-oauth2-autoconfigure</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
@@ -250,9 +246,8 @@
             <version>${lms-canvas-rivet.version}</version>
         </dependency>
         <dependency>
-            <groupId>edu.iu.uits.lms</groupId>
-            <artifactId>lms-canvas-redis-config</artifactId>
-            <version>${lms-embedded-services.version}</version>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
         </dependency>
     </dependencies>
 
