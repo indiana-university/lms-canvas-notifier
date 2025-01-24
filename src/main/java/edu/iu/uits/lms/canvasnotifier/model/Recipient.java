@@ -43,8 +43,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -57,11 +55,6 @@ import java.util.Date;
 
 @Entity
 @Table(name = "CANVASNOTIFIER_RECIPIENT")
-@NamedQueries({
-        @NamedQuery(name = "Recipient.findProcessedForJobByUsername", query = "from Recipient where job.id = :jobId and username = :username"),
-        @NamedQuery(name = "Recipient.findByJob", query = "from Recipient where job.id = :jobId order by id asc")
-})
-
 @SequenceGenerator(name = "CANVASNOTIFIER_RECIPIENT_ID_SEQ", sequenceName = "CANVASNOTIFIER_RECIPIENT_ID_SEQ", allocationSize = 1)
 @Data
 @NoArgsConstructor

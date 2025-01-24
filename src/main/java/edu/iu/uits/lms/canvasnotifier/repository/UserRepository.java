@@ -34,6 +34,7 @@ package edu.iu.uits.lms.canvasnotifier.repository;
  */
 
 import edu.iu.uits.lms.canvasnotifier.model.User;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -43,10 +44,15 @@ import java.util.List;
 
 @Component
 public interface UserRepository extends PagingAndSortingRepository<User, Long>, ListCrudRepository<User, Long> {
-
+   @Query("from User where username = :username")
    User findByUsername(@Param("username") String username);
-   User findByCanvasUserId(@Param("canvasUserId") String canvasUserId);
-   List<User> findAllAuthorizedSenders();
-   List<User> findAllAuthorizedUsers();
 
+   @Query("from User where canvasUserId = :canvasUserId")
+   User findByCanvasUserId(@Param("canvasUserId") String canvasUserId);
+
+   @Query("from User where authorizedSender = true order by displayName asc")
+   List<User> findAllAuthorizedSenders();
+
+   @Query("from User where authorizedUser = true order by displayName asc")
+   List<User> findAllAuthorizedUsers();
 }
