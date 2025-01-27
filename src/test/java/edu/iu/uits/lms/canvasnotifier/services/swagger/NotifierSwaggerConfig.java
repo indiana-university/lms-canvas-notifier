@@ -2,10 +2,9 @@ package edu.iu.uits.lms.canvasnotifier.services.swagger;
 
 import edu.iu.uits.lms.canvasnotifier.config.SecurityConfig;
 import edu.iu.uits.lms.canvasnotifier.config.SwaggerConfig;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.email.config.EmailRestConfiguration;
 import edu.iu.uits.lms.iuonly.config.IuCustomRestConfiguration;
-import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
 import edu.iu.uits.lms.lti.config.LtiRestConfiguration;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
@@ -48,7 +47,7 @@ public class NotifierSwaggerConfig {
    private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
 
    @MockBean
-   private UserRepository userRepository;
+   private AuthorizedUserService authorizedUserService;
 
 
    @Bean

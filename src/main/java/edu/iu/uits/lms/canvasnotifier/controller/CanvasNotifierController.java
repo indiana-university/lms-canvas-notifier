@@ -35,15 +35,16 @@ package edu.iu.uits.lms.canvasnotifier.controller;
 
 import com.google.gson.Gson;
 import com.opencsv.CSVReader;
+import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
-import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.model.form.CanvasNotifierFormModel;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
 import edu.iu.uits.lms.lti.service.OidcTokenUtils;
@@ -61,6 +62,7 @@ import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenti
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,19 +78,19 @@ public class CanvasNotifierController extends OidcTokenAwareController {
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @RequestMapping({"/launch", "/main"})
     @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
     public String main(Model model, CanvasNotifierFormModel canvasNotifierFormModel) {
-        List<User> userList = new ArrayList<>();
 
-        User pickOptionDummyUser = new User();
+        List<AuthorizedUser> userList = new ArrayList<>(authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION));
+        userList.sort(Comparator.comparing(AuthorizedUser::getDisplayName, String. CASE_INSENSITIVE_ORDER));
+
+        AuthorizedUser pickOptionDummyUser = new AuthorizedUser();
         pickOptionDummyUser.setId(-1L);
         pickOptionDummyUser.setDisplayName("Choose a username...");
-
-        userList.add(pickOptionDummyUser);
-        userList.addAll(userRepository.findAllAuthorizedSenders());
+        userList.addFirst(pickOptionDummyUser);
 
         canvasNotifierFormModel.setUserList(userList);
 
@@ -109,7 +111,9 @@ public class CanvasNotifierController extends OidcTokenAwareController {
                 canvasNotifierFormModel.getSelectedSenderCanvasId().isEmpty() || canvasNotifierFormModel.getSelectedSenderCanvasId().equals("-1")) {
             canvasNotifierFormModel.getFieldErrorsMap().put("sender", true);
         } else {
-            canvasNotifierFormModel.setSelectedSenderDisplayName(userRepository.findByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId()).getDisplayName());
+            canvasNotifierFormModel.setSelectedSenderDisplayName(authorizedUserService
+                    .findByActiveCanvasUserIdAndToolPermission(canvasNotifierFormModel.getSelectedSenderCanvasId(), Constants.AUTH_SENDER_TOOL_PERMISSION)
+                    .getDisplayName());
         }
 
         if (canvasNotifierFormModel.getSubject() == null || canvasNotifierFormModel.getSubject().isEmpty()) {
