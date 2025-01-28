@@ -34,6 +34,7 @@ package edu.iu.uits.lms.canvasnotifier.repository;
  */
 
 import edu.iu.uits.lms.canvasnotifier.model.Recipient;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -43,6 +44,9 @@ import java.util.List;
 
 @Component
 public interface RecipientRepository extends PagingAndSortingRepository<Recipient, Long>, ListCrudRepository<Recipient, Long> {
+    @Query("from Recipient where job.id = :jobId and username = :username")
     Recipient findProcessedForJobByUsername(@Param("jobId") Long jobId, @Param("username") String username);
+
+    @Query("from Recipient where job.id = :jobId order by id asc")
     List<Recipient> findByJob(@Param("jobId") Long jobId);
 }

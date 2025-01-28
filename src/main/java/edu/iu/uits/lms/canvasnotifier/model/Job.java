@@ -43,9 +43,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -59,14 +56,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "CANVASNOTIFIER_JOB")
-//@NamedQueries({
-//        @NamedQuery(name = "Job.findAllRunningJobs", query = "from Job where status in ('STARTED', 'RESTARTED') order by id"),
-//
-//// 300 = 5 minutes in below query
-//        @NamedQuery(name = "Job.getElevatedJobsOlderThan", query = "from Job job where job.senderWasElevated = true and job.senderIsElevated = true and EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) - 300 > EXTRACT(EPOCH FROM job.modifiedOn) order by job.id asc"),
-//        @NamedQuery(name = "Job.getRunningJobsBySenderCanvasId", query = "from Job job where job.sender_canvasid = :senderId and ((status = 'PENDING' and EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) - 300 < EXTRACT(EPOCH FROM job.modifiedOn)) or status = 'STARTED' or status = 'RESTARTED') order by job.id asc")
-//})
-
 @SequenceGenerator(name = "CANVASNOTIFIER_JOB_ID_SEQ", sequenceName = "CANVASNOTIFIER_JOB_ID_SEQ", allocationSize = 1)
 @Data
 @NoArgsConstructor
@@ -90,12 +79,10 @@ public class Job extends ModelWithDates {
     private String subject;
 
     @NonNull
-    @Lob
     @Column(columnDefinition = "text")
     private String body;
 
     @NonNull
-    @Lob
     @Column(columnDefinition = "text")
     private String json_csv;
 
