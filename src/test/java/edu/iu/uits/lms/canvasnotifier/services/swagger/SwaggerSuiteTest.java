@@ -4,22 +4,22 @@ package edu.iu.uits.lms.canvasnotifier.services.swagger;
  * #%L
  * canvasnotifier
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *
+ * 
  * 3. Neither the name of the Indiana University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -33,29 +33,44 @@ package edu.iu.uits.lms.canvasnotifier.services.swagger;
  * #L%
  */
 
-import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageListener;
-import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
-import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
-import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import edu.iu.uits.lms.lti.swagger.AbstractSwaggerCustomTest;
+import edu.iu.uits.lms.lti.swagger.AbstractSwaggerDisabledTest;
+import edu.iu.uits.lms.lti.swagger.AbstractSwaggerEmbeddedToolTest;
+import edu.iu.uits.lms.lti.swagger.AbstractSwaggerUiCustomTest;
+import org.junit.jupiter.api.Nested;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.NestedTestConfiguration;
 
-import javax.sql.DataSource;
+import static edu.iu.uits.lms.email.EmailConstants.EMAILREST_PROFILE;
+import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOMREST_PROFILE;
+import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 
-@TestConfiguration
-public class SwaggerNotifierTestConfig {
-    @MockBean
-    private BufferingApplicationStartup bufferingApplicationStartup;
 
-    @MockBean
-    private CanvasDataServiceImpl canvasDataService;
+@NestedTestConfiguration(INHERIT)
+public class SwaggerSuiteTest {
+   @Nested
+    @SpringBootTest(classes = {NotifierSwaggerConfig.class})
+    public class SwaggerCustomTest extends AbstractSwaggerCustomTest {
 
-    @MockBean
-    private CanvasNotifierMessageListener canvasNotifierMessageListener;
+    }
 
-    @MockBean
-    private DataSource dataSource;
+    @Nested
+    @SpringBootTest(classes = {NotifierSwaggerConfig.class})
+    public class SwaggerDisabledTest extends AbstractSwaggerDisabledTest {
 
-    @MockBean
-    private SisServiceImpl sisService;
+    }
+
+    @Nested
+    @SpringBootTest(classes = {NotifierSwaggerConfig.class})
+    @ActiveProfiles({IUCUSTOMREST_PROFILE, EMAILREST_PROFILE})
+    public class SwaggerEmbeddedToolTest extends AbstractSwaggerEmbeddedToolTest {
+
+    }
+
+    @Nested
+    @SpringBootTest(classes = {NotifierSwaggerConfig.class})
+    public class SwaggerUiCustomTest extends AbstractSwaggerUiCustomTest {
+
+    }
 }

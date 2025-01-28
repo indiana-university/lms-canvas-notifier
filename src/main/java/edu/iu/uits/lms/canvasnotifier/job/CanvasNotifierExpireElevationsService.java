@@ -41,11 +41,11 @@ import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.email.model.EmailDetails;
 import edu.iu.uits.lms.email.service.EmailService;
 import edu.iu.uits.lms.email.service.LmsEmailTooBigException;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.List;
 

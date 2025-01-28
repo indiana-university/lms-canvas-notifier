@@ -34,13 +34,16 @@ package edu.iu.uits.lms.canvasnotifier.services;
  */
 
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
+import edu.iu.uits.lms.canvasnotifier.config.SecurityConfig;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.TestUtils;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -49,7 +52,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
@@ -57,7 +62,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CanvasNotifierController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-@Import(ToolConfig.class)
+@ContextConfiguration(classes = {ToolConfig.class, CanvasNotifierController.class, SecurityConfig.class})
 @ActiveProfiles("none")
 public class AppLaunchSecurityTest {
 
@@ -75,6 +80,15 @@ public class AppLaunchSecurityTest {
 
    @MockBean
    private SisServiceImpl sisService;
+
+   @MockBean
+   private ClientRegistrationRepository clientRegistrationRepository;
+
+   @MockBean
+   private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+   @MockBean(name = ServerInfo.BEAN_NAME)
+   private ServerInfo serverInfo;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
