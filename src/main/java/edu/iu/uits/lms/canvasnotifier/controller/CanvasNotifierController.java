@@ -85,7 +85,7 @@ public class CanvasNotifierController extends OidcTokenAwareController {
     public String main(Model model, CanvasNotifierFormModel canvasNotifierFormModel) {
 
         List<AuthorizedUser> userList = new ArrayList<>(authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION));
-        userList.sort(Comparator.comparing(AuthorizedUser::getDisplayName, String. CASE_INSENSITIVE_ORDER));
+        userList.sort(Comparator.comparing(AuthorizedUser::getDisplayName, String.CASE_INSENSITIVE_ORDER));
 
         AuthorizedUser pickOptionDummyUser = new AuthorizedUser();
         pickOptionDummyUser.setId(-1L);
