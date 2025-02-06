@@ -331,6 +331,7 @@
                     <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
                     <excludes>
                         <exclude>**/canvasnotifier.properties</exclude>
+                        <exclude>**/logback-test.xml</exclude>
                     </excludes>
                 </configuration>
             </plugin>
