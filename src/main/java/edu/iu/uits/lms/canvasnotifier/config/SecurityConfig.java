@@ -71,9 +71,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())))
-                .with(new RestSecurityLoggingConfig(), log -> {
-                });
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())));
         return http.build();
     }
 
@@ -116,8 +114,7 @@ public class SecurityConfig {
                         .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, userRepository)));
 
         http.securityMatcher("/**")
-                .authorizeHttpRequests((authz) -> authz.anyRequest().authenticated()
-                        .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor()))
+                .authorizeHttpRequests((authz) -> authz.anyRequest().authenticated())
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp ->
                                 csp.policyDirectives("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com"))

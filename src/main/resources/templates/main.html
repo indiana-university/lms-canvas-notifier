@@ -66,14 +66,14 @@
     <h1 id="cnTitle" class="rvt-ts-32 rvt-m-bottom-xs">Canvas Notifier</h1>
 
     <form id="createNotifyForm" th:object="${canvasNotifierFormModel}" th:action="@{|/app/preview|}" method="post" enctype="multipart/form-data">
-        <p aria-hidden="true" class="req-instruction">All fields marked with <span th:replace="fragments :: reqAsterisk" /> are required</p>
+        <p aria-hidden="true" class="req-instruction">All fields marked with <span th:replace="~{fragments :: reqAsterisk}" /> are required</p>
         <div class="rvt-grid">
             <div class="rvt-grid__item" th:with="senderError=${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('sender')},
                 subjectError=${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('subject')},
                 bodyError=${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('body')},
                 attachError=${canvasNotifierFormModel.fieldErrorsMap != null && canvasNotifierFormModel.fieldErrorsMap.containsKey('attachment')}">
                 
-                <label class="cnLabel" for="senderUserId">Sender's Username <span th:replace="fragments :: reqAsterisk"></span></label>
+                <label class="cnLabel" for="senderUserId">Sender's Username <span th:replace="~{fragments :: reqAsterisk}"></span></label>
                 <div>
                     <select id="senderUserId" th:field="*{selectedSenderCanvasId}" class="rvt-select"
                             th:classappend="${senderError} ? rvt-validation-danger" 
@@ -86,7 +86,7 @@
                     <div th:replace="fragments :: field-error('state-message', 'You must choose a sender.')" />
                 </div>
 
-                <label for="msgSubject" class="cnLabel rvt-m-top-md rvt-label">Message Subject <span th:replace="fragments :: reqAsterisk"></span></label>
+                <label for="msgSubject" class="cnLabel rvt-m-top-md rvt-label">Message Subject <span th:replace="~{fragments :: reqAsterisk}"></span></label>
                 <input id="msgSubject" th:field="*{subject}" type="text" class="rvt-text-input"
                        th:classappend="${subjectError} ? rvt-validation-danger"
                        th:attr="aria-required='true', aria-describedby=${subjectError} ? 'messageSubject', aria-invalid=${subjectError} ? 'true'" />
@@ -95,7 +95,7 @@
                     <div th:replace="fragments :: field-error('messageSubject', 'You must enter a subject.')" />
                 </div>
 
-                <label for="msgBody" class="cnLabel rvt-m-top-md rvt-label">Message Body <span th:replace="fragments :: reqAsterisk"></span></label>
+                <label for="msgBody" class="cnLabel rvt-m-top-md rvt-label">Message Body <span th:replace="~{fragments :: reqAsterisk}"></span></label>
                 <textarea type="text" id="msgBody" th:field="*{body}" class="rvt-textarea"
                            th:classappend="${bodyError} ? rvt-validation-danger"
                           th:attr="aria-required='true', aria-describedby=${bodyError} ? 'description-message', aria-invalid=${bodyError} ? 'true'"></textarea>
@@ -104,7 +104,7 @@
                     <div th:replace="fragments :: field-error('description-message', 'You must enter a message.')" />
                 </div>
 
-                <p class="recipients">Recipients <span th:replace="fragments :: reqAsterisk"></span></p>
+                <p class="recipients">Recipients <span th:replace="~{fragments :: reqAsterisk}"></span></p>
                 <div class="rvt-file" data-rvt-file-input="cnAttachment">
                     <input type="file" data-rvt-file-input-button="cnAttachment" id="cnAttachment" name="cnAttachment" aria-required="true"
                            aria-describedby="cnAttachmentDescription" th:attrappend="aria-describedby=${attachError} ? ' ' + csvMessage"
