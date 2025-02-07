@@ -34,8 +34,6 @@ package edu.iu.uits.lms.canvasnotifier.config;
  */
 
 import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
-import edu.iu.uits.lms.common.it12logging.LmsFilterSecurityInterceptorObjectPostProcessor;
-import edu.iu.uits.lms.common.it12logging.RestSecurityLoggingConfig;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,9 +79,7 @@ public class SecurityConfig {
         http.securityMatcher(WELL_KNOWN_ALL, "/error", "/app/**")
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(WELL_KNOWN_ALL, "/error").permitAll()
-                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY)
-                        .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
-                )
+                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY))
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com"))
                         .referrerPolicy(referrer -> referrer
