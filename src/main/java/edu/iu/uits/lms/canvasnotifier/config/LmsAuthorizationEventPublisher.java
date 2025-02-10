@@ -2,6 +2,7 @@ package edu.iu.uits.lms.canvasnotifier.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.event.AuthorizationEvent;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
 
+@Profile("it12")
 @Component
 @Slf4j
 public class LmsAuthorizationEventPublisher implements AuthorizationEventPublisher {
