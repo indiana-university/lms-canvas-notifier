@@ -33,14 +33,15 @@ package edu.iu.uits.lms.canvasnotifier.rest;
  * #L%
  */
 
+import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
-import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,7 @@ public class JobRestController {
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public Job getJobFromId(@PathVariable Long id) {
@@ -196,14 +197,9 @@ public class JobRestController {
             return new NotifierJobRestMessage("No canvas sender user id provided", null);
         }
 
-        User user = userRepository.findByCanvasUserId(canvasSenderUserId.toString());
+        AuthorizedUser user = authorizedUserService.findByActiveCanvasUserIdAndToolPermission(canvasSenderUserId.toString(), Constants.AUTH_SENDER_TOOL_PERMISSION);
 
         if (user == null) {
-            return new NotifierJobRestMessage(String.format("User not found with canvas sender user id %d provided",
-                    canvasSenderUserId), null);
-        }
-
-        if (! user.isAuthorizedSender()) {
             return new NotifierJobRestMessage(String.format("Provided canvas sender user %d is not an authorized sender",
                     canvasSenderUserId), null);
         }

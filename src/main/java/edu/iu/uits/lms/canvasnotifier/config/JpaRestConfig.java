@@ -1,10 +1,10 @@
-package edu.iu.uits.lms.canvasnotifier.repository;
+package edu.iu.uits.lms.canvasnotifier.config;
 
 /*-
  * #%L
  * canvasnotifier
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,26 +33,29 @@ package edu.iu.uits.lms.canvasnotifier.repository;
  * #L%
  */
 
-import edu.iu.uits.lms.canvasnotifier.model.User;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Component;
+import edu.iu.uits.lms.common.swagger.LmsRepositoryDetectionStrategy;
+import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-import java.util.List;
+@Configuration
+@Slf4j
+public class JpaRestConfig implements RepositoryRestConfigurer {
 
-@Component
-public interface UserRepository extends PagingAndSortingRepository<User, Long>, ListCrudRepository<User, Long> {
-   @Query("from User where username = :username")
-   User findByUsername(@Param("username") String username);
+    @Autowired
+    private SpringDocConfigProperties springDocConfigProperties;
 
-   @Query("from User where canvasUserId = :canvasUserId")
-   User findByCanvasUserId(@Param("canvasUserId") String canvasUserId);
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
+        //  This is needed to allow the "ids" to be served up via the
+        //  @RepositoryRestResource annotation (by default, it is suppressed)
 
-   @Query("from User where authorizedSender = true order by displayName asc")
-   List<User> findAllAuthorizedSenders();
 
-   @Query("from User where authorizedUser = true order by displayName asc")
-   List<User> findAllAuthorizedUsers();
+        RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
+        config.setRepositoryDetectionStrategy(new LmsRepositoryDetectionStrategy(springDocConfigProperties.getPackagesToScan()));
+    }
 }

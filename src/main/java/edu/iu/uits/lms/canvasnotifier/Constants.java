@@ -1,10 +1,10 @@
-package edu.iu.uits.lms.canvasnotifier.model;
+package edu.iu.uits.lms.canvasnotifier;
 
 /*-
  * #%L
  * canvasnotifier
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,40 +33,8 @@ package edu.iu.uits.lms.canvasnotifier.model;
  * #L%
  */
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+public interface Constants {
 
-import java.io.Serializable;
-
-@Entity
-@Table(name = "CANVASNOTIFIER_USERS")
-@SequenceGenerator(name = "CANVASNOTIFIER_USERS_ID_SEQ", sequenceName = "CANVASNOTIFIER_USERS_ID_SEQ", allocationSize = 1)
-@Data
-@RequiredArgsConstructor
-public class User extends ModelWithDates implements Serializable {
-   @Id
-   @GeneratedValue(generator = "CANVASNOTIFIER_USERS_ID_SEQ")
-   @Column(name = "CANVASNOTIFIER_USERS_ID")
-   private Long id;
-
-   @Column(name = "DISPLAY_NAME")
-   private String displayName;
-
-   @Column(name = "USERNAME")
-   private String username;
-
-   @Column(name = "CANVAS_USER_ID")
-   private String canvasUserId;
-
-   @Column(name = "IS_AUTHORIZED_SENDER")
-   private boolean authorizedSender;
-
-   @Column(name = "IS_AUTHORIZED_USER")
-   private boolean authorizedUser;
+    String AUTH_USER_TOOL_PERMISSION = "NOTIF_USER";
+    String AUTH_SENDER_TOOL_PERMISSION = "NOTIF_SENDER";
 }

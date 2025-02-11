@@ -33,7 +33,7 @@ package edu.iu.uits.lms.canvasnotifier.model.form;
  * #L%
  */
 
-import edu.iu.uits.lms.canvasnotifier.model.User;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,7 +43,7 @@ import java.util.Map;
 @Data
 public class CanvasNotifierFormModel {
 
-    private List<User> userList;
+    private List<AuthorizedUser> userList;
 
     private String selectedSenderCanvasId;
     private String selectedSenderDisplayName;

@@ -38,14 +38,17 @@ import edu.iu.uits.lms.canvas.services.AccountService;
 import edu.iu.uits.lms.canvas.services.CanvasService;
 import edu.iu.uits.lms.canvas.services.ConversationService;
 import edu.iu.uits.lms.canvas.services.UserService;
+import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.handler.JobResult;
 import edu.iu.uits.lms.canvasnotifier.handler.NotificationMessageHandler;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.email.service.EmailService;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.model.acl.ToolPermission;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +62,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class NotificationMessageHandlerTest {
@@ -95,7 +100,7 @@ public class NotificationMessageHandlerTest {
     private ToolConfig toolConfig;
 
     @Mock
-    private UserRepository userRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @Mock
     private UserService usersApi;
@@ -114,7 +119,7 @@ public class NotificationMessageHandlerTest {
                   "[\"" + recipients[2] + "\",\" Express\",\" batman\"]," +
                   "[\"" + recipients[3] + "\",\" crap team\",\" me\"],[\"\"]]";
 
-        Mockito.reset(jobRepository, userRepository, usersApi);
+        Mockito.reset(jobRepository, authorizedUserService, usersApi);
 
 
     }
@@ -273,7 +278,7 @@ public class NotificationMessageHandlerTest {
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in notifier database".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user is not an authorized user".equals(em)));
     }
 
     @Test
@@ -299,10 +304,7 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(canvasUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierUser.setAuthorizedUser(false);
-
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(null);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -334,10 +336,13 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(canvasUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierUser.setAuthorizedUser(true);
+        AuthorizedUser notifierUser = new AuthorizedUser();
+        notifierUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        notifierUser.setToolPermissions(toolPermissionMap);
 
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -371,10 +376,13 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierUser.setAuthorizedUser(true);
+        AuthorizedUser notifierUser = new AuthorizedUser();
+        notifierUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        notifierUser.setToolPermissions(toolPermissionMap);
 
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -414,17 +422,20 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierUser.setAuthorizedUser(true);
+        AuthorizedUser notifierUser = new AuthorizedUser();
+        notifierUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        notifierUser.setToolPermissions(toolPermissionMap);
 
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
 
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
         Assertions.assertNotNull(jobResult.getCanvasSenderUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Send user not found in notifier database".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user is not an authorized sending user".equals(em)));
     }
 
     @Test
@@ -458,14 +469,17 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierInitiatedByUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierInitiatedByUser.setAuthorizedUser(true);
+        AuthorizedUser notifierInitiatedByUser = new AuthorizedUser();
+        notifierInitiatedByUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        notifierInitiatedByUser.setToolPermissions(toolPermissionMap);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierSenderUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierSenderUser.setAuthorizedSender(false);
+        AuthorizedUser notifierSenderUser = new AuthorizedUser();
+        notifierSenderUser.setActive(true);
 
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierInitiatedByUser);
-        Mockito.when(userRepository.findByUsername(sendUsername)).thenReturn(notifierSenderUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierInitiatedByUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(null);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -506,14 +520,20 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierInitiatedByUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierInitiatedByUser.setAuthorizedUser(true);
+        AuthorizedUser notifierInitiatedByUser = new AuthorizedUser();
+        notifierInitiatedByUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        notifierInitiatedByUser.setToolPermissions(toolPermissionMap);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierSenderUser = new edu.iu.uits.lms.canvasnotifier.model.User();
-        notifierSenderUser.setAuthorizedSender(true);
+        AuthorizedUser notifierSenderUser = new AuthorizedUser();
+        notifierSenderUser.setActive(true);
+        Map<String, ToolPermission> toolPermissionMap2 = new HashMap<>();
+        toolPermissionMap2.put(Constants.AUTH_SENDER_TOOL_PERMISSION, new ToolPermission());
+        notifierSenderUser.setToolPermissions(toolPermissionMap2);
 
-        Mockito.when(userRepository.findByUsername(initiatedByUsername)).thenReturn(notifierInitiatedByUser);
-        Mockito.when(userRepository.findByUsername(sendUsername)).thenReturn(notifierSenderUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierInitiatedByUser);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(notifierSenderUser);
 
         notificationMessageHandler.validateJob(jobResult);
 

@@ -40,6 +40,7 @@ import edu.iu.uits.lms.canvas.services.AccountService;
 import edu.iu.uits.lms.canvas.services.CanvasService;
 import edu.iu.uits.lms.canvas.services.ConversationService;
 import edu.iu.uits.lms.canvas.services.UserService;
+import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessage;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
@@ -47,13 +48,14 @@ import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.model.Recipient;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
 import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
 import edu.iu.uits.lms.common.date.DateFormatUtil;
 import edu.iu.uits.lms.email.model.EmailDetails;
 import edu.iu.uits.lms.email.service.EmailService;
 import edu.iu.uits.lms.iuonly.model.ListWrapper;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +108,7 @@ public class NotificationMessageHandler {
     private ToolConfig toolConfig;
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @Autowired
     private UserService userService;
@@ -405,17 +407,9 @@ public class NotificationMessageHandler {
 
         jobResult.setCanvasInitiatingUser(canvasInitiatingUser);
 
-        if (userRepository.findByUsername(job.getInitited_by_username()) == null) {
-            String errorMessage = "Initiated by user not found in notifier database";
+        AuthorizedUser notifierInitiatedUser = authorizedUserService.findByActiveUsernameAndToolPermission(job.getInitited_by_username(), Constants.AUTH_USER_TOOL_PERMISSION);
 
-            jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
-            return;
-        }
-
-        edu.iu.uits.lms.canvasnotifier.model.User notifierInitiatedUser = userRepository.findByUsername(job.getInitited_by_username());
-
-        if (! notifierInitiatedUser.isAuthorizedUser()) {
+        if (notifierInitiatedUser == null) {
             String errorMessage = "Initiated by user is not an authorized user";
 
             jobResult.addErrorMessage(errorMessage);
@@ -443,19 +437,9 @@ public class NotificationMessageHandler {
 
         jobResult.setCanvasSenderUser(canvasSenderUser);
 
-        edu.iu.uits.lms.canvasnotifier.model.User notifierSenderUser = userRepository.findByUsername(canvasSenderUser.getLoginId());
+        AuthorizedUser notifierSenderUser = authorizedUserService.findByActiveUsernameAndToolPermission(canvasSenderUser.getLoginId(), Constants.AUTH_SENDER_TOOL_PERMISSION);
 
         if (notifierSenderUser == null) {
-            String errorMessage = "Send user not found in notifier database";
-
-            jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
-            return;
-        }
-
-        jobResult.setSenderDisplayName(notifierSenderUser.getDisplayName());
-
-        if (! notifierSenderUser.isAuthorizedSender()) {
             String errorMessage = "Sender user is not an authorized sending user";
 
             jobResult.addErrorMessage(errorMessage);
@@ -463,6 +447,7 @@ public class NotificationMessageHandler {
             return;
         }
 
+        jobResult.setSenderDisplayName(notifierSenderUser.getDisplayName());
         jobResult.setJob(job);
     }
 

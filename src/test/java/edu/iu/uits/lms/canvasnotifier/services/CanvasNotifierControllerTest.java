@@ -33,10 +33,12 @@ package edu.iu.uits.lms.canvasnotifier.services;
  * #L%
  */
 
+import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
-import edu.iu.uits.lms.canvasnotifier.model.User;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.model.acl.ToolPermission;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.TestUtils;
 import lombok.NonNull;
@@ -60,7 +62,9 @@ import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenti
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
@@ -81,7 +85,7 @@ public class CanvasNotifierControllerTest {
 
     @Autowired
     @Mock
-    private UserRepository userRepository;
+    private AuthorizedUserService authorizedUserService;
 
     private MockMvc mockMvc;
 
@@ -109,7 +113,7 @@ public class CanvasNotifierControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(token);
 
-        Mockito.reset(userRepository);
+        Mockito.reset(authorizedUserService);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(canvasNotifierController)
@@ -137,10 +141,10 @@ public class CanvasNotifierControllerTest {
 
     @Test
     public void testAllowAuthorizedUserAccessMain() throws Exception {
-        User user = new User();
-        user.setAuthorizedUser(true);
+        AuthorizedUser user = new AuthorizedUser();
+        user.setActive(true);
 
-        Mockito.when(userRepository.findByUsername("user1")).thenReturn(user);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission("user1", Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(user);
 
         authorizedUserAccess(Method.GET, "main", "main");
     }
@@ -156,27 +160,30 @@ public class CanvasNotifierControllerTest {
         final String canvasId1="12345";
         final String canvasId2="67890";
 
-        User authorizedButNotSenderUser = new User();
-        authorizedButNotSenderUser.setAuthorizedUser(true);
-        authorizedButNotSenderUser.setAuthorizedSender(false);
+        AuthorizedUser authorizedButNotSenderUser = new AuthorizedUser();
+        authorizedButNotSenderUser.setActive(true);
         authorizedButNotSenderUser.setDisplayName(displayName1);
         authorizedButNotSenderUser.setUsername(username1);
         authorizedButNotSenderUser.setCanvasUserId(canvasId1);
+        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
+        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
+        authorizedButNotSenderUser.setToolPermissions(toolPermissionMap);
 
-        User notAuthorizedButSenderUser = new User();
+        AuthorizedUser notAuthorizedButSenderUser = new AuthorizedUser();
         notAuthorizedButSenderUser.setId(1L);
-        notAuthorizedButSenderUser.setAuthorizedUser(false);
-        notAuthorizedButSenderUser.setAuthorizedSender(true);
         notAuthorizedButSenderUser.setDisplayName(displayName2);
         notAuthorizedButSenderUser.setUsername(username2);
         notAuthorizedButSenderUser.setCanvasUserId(canvasId2);
+        Map<String, ToolPermission> toolPermissionMap2 = new HashMap<>();
+        toolPermissionMap2.put(Constants.AUTH_SENDER_TOOL_PERMISSION, new ToolPermission());
+        notAuthorizedButSenderUser.setToolPermissions(toolPermissionMap2);
 
 
-        List<User> userRepositoryResultList = new ArrayList<>();
+        List<AuthorizedUser> userRepositoryResultList = new ArrayList<>();
         userRepositoryResultList.add(notAuthorizedButSenderUser);
 
-        Mockito.when(userRepository.findByUsername("user1")).thenReturn(authorizedButNotSenderUser);
-        Mockito.when(userRepository.findAllAuthorizedSenders()).thenReturn(userRepositoryResultList);
+        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission("user1", Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(authorizedButNotSenderUser);
+        Mockito.when(authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(userRepositoryResultList);
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/app/main", ID));
 

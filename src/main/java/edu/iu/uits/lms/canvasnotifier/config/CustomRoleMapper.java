@@ -33,8 +33,8 @@ package edu.iu.uits.lms.canvasnotifier.config;
  * #L%
  */
 
-import edu.iu.uits.lms.canvasnotifier.model.User;
-import edu.iu.uits.lms.canvasnotifier.repository.UserRepository;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
@@ -47,15 +47,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static edu.iu.uits.lms.canvasnotifier.Constants.AUTH_USER_TOOL_PERMISSION;
+
 @Slf4j
 public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
-   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, UserRepository userRepository) {
+   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, AuthorizedUserService authorizedUserService) {
       super(defaultInstructorRoleRepository);
-      this.userRepository = userRepository;
+      this.authorizedUserService = authorizedUserService;
    }
 
-   private UserRepository userRepository;
+   private AuthorizedUserService authorizedUserService;
 
    @Override
    public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
@@ -71,9 +73,9 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
          String rolesString = "NotAuthorized";
 
-         User user = userRepository.findByUsername(userId);
+         AuthorizedUser user = authorizedUserService.findByActiveUsernameAndToolPermission(userId, AUTH_USER_TOOL_PERMISSION);
 
-         if (user != null && user.isAuthorizedUser()) {
+         if (user != null) {
             rolesString = LTIConstants.CANVAS_INSTRUCTOR_ROLE;
          }
 
