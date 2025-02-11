@@ -33,8 +33,6 @@ package edu.iu.uits.lms.canvasnotifier.config;
  * #L%
  */
 
-import edu.iu.uits.lms.common.it12logging.LmsFilterSecurityInterceptorObjectPostProcessor;
-import edu.iu.uits.lms.common.it12logging.RestSecurityLoggingConfig;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
@@ -71,9 +69,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())))
-                .with(new RestSecurityLoggingConfig(), log -> {
-                });
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())));
         return http.build();
     }
 
@@ -83,9 +79,7 @@ public class SecurityConfig {
         http.securityMatcher(WELL_KNOWN_ALL, "/error", "/app/**")
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(WELL_KNOWN_ALL, "/error").permitAll()
-                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY)
-                        .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
-                )
+                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY))
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com"))
                         .referrerPolicy(referrer -> referrer
@@ -116,8 +110,7 @@ public class SecurityConfig {
                         .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, authorizedUserService)));
 
         http.securityMatcher("/**")
-                .authorizeHttpRequests((authz) -> authz.anyRequest().authenticated()
-                        .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor()))
+                .authorizeHttpRequests((authz) -> authz.anyRequest().authenticated())
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp ->
                                 csp.policyDirectives("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com"))
