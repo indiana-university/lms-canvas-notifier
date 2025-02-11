@@ -48,10 +48,9 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Li
     @Query("from Job where status in ('STARTED', 'RESTARTED') order by id")
     List<Job> findAllRunningJobs();
 
-    // 300 = 5 minutes in below query
-    @Query("from Job job where job.senderWasElevated = true and job.senderIsElevated = true and EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) - 300 > EXTRACT(EPOCH FROM job.modifiedOn) order by job.id asc")
+    @Query("from Job job where job.senderWasElevated = true and job.senderIsElevated = true and CURRENT_TIMESTAMP - 5 MINUTE > job.modifiedOn order by job.id asc")
     List<Job> getElevatedJobsOlderThan();
 
-    @Query("from Job job where job.sender_canvasid = :senderId and ((status = 'PENDING' and EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) - 300 < EXTRACT(EPOCH FROM job.modifiedOn)) or status = 'STARTED' or status = 'RESTARTED') order by job.id asc")
+    @Query("from Job job where job.sender_canvasid = :senderId and ((status = 'PENDING' and CURRENT_TIMESTAMP - 5 MINUTE < job.modifiedOn) or status = 'STARTED' or status = 'RESTARTED') order by job.id asc")
     List<Job> getRunningJobsBySenderCanvasId(@Param("senderId") String senderId);
 }
