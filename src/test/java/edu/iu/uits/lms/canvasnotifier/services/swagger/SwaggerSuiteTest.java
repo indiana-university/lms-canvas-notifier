@@ -33,14 +33,20 @@ package edu.iu.uits.lms.canvasnotifier.services.swagger;
  * #L%
  */
 
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import edu.iu.uits.lms.lti.swagger.AbstractSwaggerCustomTest;
 import edu.iu.uits.lms.lti.swagger.AbstractSwaggerDisabledTest;
 import edu.iu.uits.lms.lti.swagger.AbstractSwaggerEmbeddedToolTest;
 import edu.iu.uits.lms.lti.swagger.AbstractSwaggerUiCustomTest;
 import org.junit.jupiter.api.Nested;
+import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.NestedTestConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static edu.iu.uits.lms.email.EmailConstants.EMAILREST_PROFILE;
 import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOMREST_PROFILE;
@@ -49,6 +55,22 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
 
 @NestedTestConfiguration(INHERIT)
 public class SwaggerSuiteTest {
+
+ @MockitoBean
+ private BufferingApplicationStartup bufferingApplicationStartup;
+
+ @MockitoBean
+ private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+ @MockitoBean
+ private ClientRegistrationRepository clientRegistrationRepository;
+
+ @MockitoBean
+ private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+
+ @MockitoBean
+ private AuthorizedUserService authorizedUserService;
+
    @Nested
     @SpringBootTest(classes = {NotifierSwaggerConfig.class})
     public class SwaggerCustomTest extends AbstractSwaggerCustomTest {

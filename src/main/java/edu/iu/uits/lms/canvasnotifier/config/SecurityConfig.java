@@ -44,7 +44,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
@@ -83,6 +82,8 @@ public class SecurityConfig {
         http.securityMatcher(WELL_KNOWN_ALL, "/error", "/app/**")
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(WELL_KNOWN_ALL, "/error").permitAll()
+                        .requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
+                                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY)
                         .withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())
                 )
@@ -94,12 +95,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        // ignore everything except paths specified
-        return web -> web.ignoring().requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
-                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico");
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        // ignore everything except paths specified
+//        return web -> web.ignoring().requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
+//                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico");
+//    }
 
     @Autowired
     private AuthorizedUserService authorizedUserService;
