@@ -48,7 +48,6 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Li
     @Query("from Job where status in ('STARTED', 'RESTARTED') order by id")
     List<Job> findAllRunningJobs();
 
-    // 300 = 5 minutes in below query
     @Query("from Job job where job.senderWasElevated = true and job.senderIsElevated = true and CURRENT_TIMESTAMP - 5 MINUTE > job.modifiedOn order by job.id asc")
     List<Job> getElevatedJobsOlderThan();
 
