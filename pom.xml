@@ -65,7 +65,7 @@
         <lms-embedded-services.version>6.2.1</lms-embedded-services.version>
         <lms-team-spring-boot-it12>6.5.1</lms-team-spring-boot-it12>
         <opencsv.version>5.11</opencsv.version>
-        <spring-cloud-starter-parent.version>2024.0.1</spring-cloud-starter-parent.version>
+        <spring-cloud-dependencies.version>2024.0.1</spring-cloud-dependencies.version>
         <springdoc-openapi-ui.version>2.8.8</springdoc-openapi-ui.version>
         <webjars-locator.version>0.52</webjars-locator.version>
 
@@ -81,7 +81,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud-starter-parent.version}</version>
+                <version>${spring-cloud-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
