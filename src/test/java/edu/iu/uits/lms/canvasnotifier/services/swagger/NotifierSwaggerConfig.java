@@ -61,21 +61,6 @@ import static edu.iu.uits.lms.iuonly.IuCustomConstants.IUCUSTOM_GROUP_CODE_PATH;
         LtiClientTestConfig.class
 })
 public class NotifierSwaggerConfig {
-//   @MockitoBean
-//   private BufferingApplicationStartup bufferingApplicationStartup;
-//
-//   @MockitoBean
-//   private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
-//
-//   @MockitoBean
-//   private ClientRegistrationRepository clientRegistrationRepository;
-//
-//   @MockitoBean
-//   private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
-//
-//   @MockitoBean
-//   private AuthorizedUserService authorizedUserService;
-
 
    @Bean
    public SwaggerTestingBean swaggerTestingBean() {

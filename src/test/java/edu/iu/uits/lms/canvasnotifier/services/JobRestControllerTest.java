@@ -36,57 +36,72 @@ package edu.iu.uits.lms.canvasnotifier.services;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
+import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.JobRestController;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
+import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.config.TestUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.View;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
+@WebMvcTest(controllers = JobRestController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
+@ContextConfiguration(classes = {ApplicationConfig.class, JobRestController.class})
 @Slf4j
 public class JobRestControllerTest {
     @Autowired
-    @InjectMocks
     private JobRestController jobRestController;
 
-    @Autowired
-    @Mock
+    @MockitoBean
     private JobRepository jobRepository;
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
 
-    @Mock
-    private View view;
+    @MockitoBean
+    private AuthorizedUserService authorizedUserService;
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(jobRestController)
-                .setSingleView(view)
-                .build();
+        Map<String, Object> extraAttributes = new HashMap<>();
+
+        JSONObject customMap = new JSONObject();
+        customMap.put(LTIConstants.CUSTOM_CANVAS_USER_LOGIN_ID_KEY, "user1");
+
+        OidcAuthenticationToken token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
+                extraAttributes, customMap);
+
+        SecurityContextHolder.getContext().setAuthentication(token);
     }
 
     @Test
@@ -99,7 +114,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job1.getId())).thenReturn(java.util.Optional.of(job1));
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/job/1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -133,7 +148,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findAll()).thenReturn(allJobsList);
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/job/all")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -172,7 +187,7 @@ public class JobRestControllerTest {
         job3.setId(3L);
         job3.setStatus(JobStatus.STARTED);
 
-        Assertions.assertFalse(JobStatus.ABORTED.equals(job3.getStatus()));
+        Assertions.assertNotEquals(JobStatus.ABORTED, job3.getStatus());
 
 //        Mockito.when(jobRepository.findOne(job1.getId())).thenReturn(job1);
 //        Mockito.when(jobRepository.findOne(job2.getId())).thenReturn(job2);
@@ -181,8 +196,8 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job2.getId())).thenReturn(java.util.Optional.of(job2));
         Mockito.when(jobRepository.findById(job3.getId())).thenReturn(java.util.Optional.of(job3));
 
-        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/abort")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/abort").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -194,8 +209,8 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job is already aborted", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/abort")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/abort").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
 
@@ -205,8 +220,8 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Cannot abort a finished job", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/abort")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/abort").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
 
@@ -216,8 +231,8 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job ABORTED", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/4/abort")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/4/abort").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
 
@@ -233,7 +248,7 @@ public class JobRestControllerTest {
         Job job1 = new Job();
         job1.setId(1L);
 
-        Assertions.assertFalse(JobStatus.ABORTED.equals(job1.getStatus()));
+        Assertions.assertNotEquals(JobStatus.ABORTED, job1.getStatus());
 
         Job job2 = new Job();
         job2.setId(2L);
@@ -244,8 +259,8 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job1.getId())).thenReturn(java.util.Optional.of(job1));
         Mockito.when(jobRepository.findById(job2.getId())).thenReturn(java.util.Optional.of(job2));
 
-        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/restart")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/restart").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -257,8 +272,8 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job #1 is not in an aborted state", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/restart")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/restart").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
 
@@ -268,8 +283,8 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job #2 restarted", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/restart")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/restart").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
 

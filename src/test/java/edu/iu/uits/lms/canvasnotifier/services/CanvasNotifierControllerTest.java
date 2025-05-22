@@ -34,8 +34,11 @@ package edu.iu.uits.lms.canvasnotifier.services;
  */
 
 import edu.iu.uits.lms.canvasnotifier.Constants;
+import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
+import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
+import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
 import edu.iu.uits.lms.iuonly.model.acl.ToolPermission;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
@@ -45,23 +48,19 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.View;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,25 +71,28 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 
+@WebMvcTest(controllers = CanvasNotifierController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
+@ContextConfiguration(classes = {ApplicationConfig.class, CanvasNotifierController.class})
 @Slf4j
 public class CanvasNotifierControllerTest {
 
     @Autowired
-    @InjectMocks
     private CanvasNotifierController canvasNotifierController;
 
-    @Autowired
-    @Mock
+    @MockitoBean
     private JobRepository jobRepository;
 
-    @Autowired
-    @Mock
+    @MockitoBean
     private AuthorizedUserService authorizedUserService;
 
-    private MockMvc mockMvc;
+    @MockitoBean
+    private CanvasNotifierMessageSender canvasNotifierMessageSender;
 
-    @Mock
-    private View view;
+    @MockitoBean(name = ServerInfo.BEAN_NAME)
+    private ServerInfo serverInfo;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     private static final String ID = "12345";
 
@@ -98,27 +100,10 @@ public class CanvasNotifierControllerTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
-        //setup lti token
-        List authoritiesList = Arrays.asList(new SimpleGrantedAuthority(LTIConstants.CANVAS_INSTRUCTOR_ROLE),
-                new SimpleGrantedAuthority(LTIConstants.INSTRUCTOR_AUTHORITY));
-
-//        final LtiAuthenticationToken ltiAuthenticationToken = new LtiAuthenticationToken("user1",
-//                ID,
-//                "test.uits.iu.edu",
-//                authoritiesList,
-//                "canvasnotifier");
         OidcAuthenticationToken token = TestUtils.buildToken("userId", ID, LTIConstants.INSTRUCTOR_AUTHORITY);
-
         SecurityContextHolder.getContext().setAuthentication(token);
 
         Mockito.reset(authorizedUserService);
-
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(canvasNotifierController)
-                .setSingleView(view)
-                .build();
     }
 
     private void authorizedUserAccess(@NonNull CanvasNotifierControllerTest.Method method, @NonNull String page, @NonNull String viewName) throws Exception {

@@ -90,13 +90,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        // ignore everything except paths specified
-//        return web -> web.ignoring().requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
-//                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico");
-//    }
-
     @Autowired
     private AuthorizedUserService authorizedUserService;
 
