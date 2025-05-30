@@ -62,12 +62,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/rest/job"})
 @Slf4j
-//@LmsSwaggerDocumentation
 public class JobRestController {
 
     @Autowired
@@ -118,12 +116,11 @@ public class JobRestController {
 
     @RequestMapping(value = "/all", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<Job> getJobsAll() {
-        List<Job> jobs = (List<Job>) jobRepository.findAll();
+        List<Job> jobs = jobRepository.findAll();
 
         // return reverse order date_started
         if (jobs != null) {
-            jobs  = jobs.stream()
-                    .sorted(Comparator.comparing(Job::getCreatedOn, Comparator.nullsFirst(Comparator.reverseOrder()))).collect(Collectors.toList());
+            jobs.sort(Comparator.comparing(Job::getCreatedOn, Comparator.nullsFirst(Comparator.reverseOrder())));
         }
 
         return jobs;
@@ -131,12 +128,11 @@ public class JobRestController {
 
     @RequestMapping(value = "/allrunning", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<Job> getRunningJobsAll() {
-        List<Job> jobs = (List<Job>) jobRepository.findAllRunningJobs();
+        List<Job> jobs = jobRepository.findAllRunningJobs();
 
         // return reverse order date_started
         if (jobs != null) {
-            jobs  = jobs.stream()
-                    .sorted(Comparator.comparing(Job::getCreatedOn, Comparator.nullsFirst(Comparator.reverseOrder()))).collect(Collectors.toList());
+            jobs.sort(Comparator.comparing(Job::getCreatedOn, Comparator.nullsFirst(Comparator.reverseOrder())));
         }
 
         return jobs;

@@ -47,6 +47,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,7 @@ import lombok.ToString;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "CANVASNOTIFIER_JOB")
 @SequenceGenerator(name = "CANVASNOTIFIER_JOB_ID_SEQ", sequenceName = "CANVASNOTIFIER_JOB_ID_SEQ", allocationSize = 1)

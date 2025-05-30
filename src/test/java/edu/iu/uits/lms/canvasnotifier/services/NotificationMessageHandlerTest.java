@@ -39,12 +39,14 @@ import edu.iu.uits.lms.canvas.services.CanvasService;
 import edu.iu.uits.lms.canvas.services.ConversationService;
 import edu.iu.uits.lms.canvas.services.UserService;
 import edu.iu.uits.lms.canvasnotifier.Constants;
+import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
 import edu.iu.uits.lms.canvasnotifier.config.ToolConfig;
 import edu.iu.uits.lms.canvasnotifier.handler.JobResult;
 import edu.iu.uits.lms.canvasnotifier.handler.NotificationMessageHandler;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
+import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.email.service.EmailService;
 import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
 import edu.iu.uits.lms.iuonly.model.acl.ToolPermission;
@@ -54,11 +56,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -66,43 +67,47 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SpringBootTest(classes = {NotificationMessageHandler.class, CanvasNotifierService.class, ApplicationConfig.class},
+        properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
 @Slf4j
 public class NotificationMessageHandlerTest {
     @Autowired
-    @InjectMocks
     private NotificationMessageHandler notificationMessageHandler;
 
-    @Mock
+    @Autowired
+    private CanvasNotifierService canvasNotifierService;
+
+    @MockitoBean
     private AccountService accountsApi;
 
-    @Mock
+    @MockitoBean
     private CanvasService canvasApi;
 
-    @Mock
+    @MockitoBean
     private CanvasDataServiceImpl canvasDataApi;
 
-    @Mock
+    @MockitoBean
     private ConversationService conversationsApi;
 
-    @Mock
+    @MockitoBean
     private DataSource dataSource;
 
-    @Mock
+    @MockitoBean
     private EmailService emailApi;
 
-    @Mock
+    @MockitoBean
     private JobRepository jobRepository;
 
-    @Mock
+    @MockitoBean
     private RecipientRepository recipientRepository;
 
-    @Mock
+    @MockitoBean
     private ToolConfig toolConfig;
 
-    @Mock
+    @MockitoBean
     private AuthorizedUserService authorizedUserService;
 
-    @Mock
+    @MockitoBean
     private UserService usersApi;
 
     private final String[] recipients = new String[]{"senduser1", "senduser2", "senduser3", "senduser4"};
@@ -111,8 +116,6 @@ public class NotificationMessageHandlerTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         jsonCsvString = "[[\"username\",\" team\",\" superhero\"]," +
                   "[\"" + recipients[0] + "\",\" Fuel\",\" spiderman\"]," +
                   "[\"" + recipients[1] + "\",\" Bills\",\" Wonder Woman\"]," +
@@ -120,8 +123,6 @@ public class NotificationMessageHandlerTest {
                   "[\"" + recipients[3] + "\",\" crap team\",\" me\"],[\"\"]]";
 
         Mockito.reset(jobRepository, authorizedUserService, usersApi);
-
-
     }
 
     @Test
@@ -131,7 +132,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "JobId can't be empty".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("JobId can't be empty"::equals));
     }
 
     @Test
@@ -142,7 +143,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Can't find jobId".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Can't find jobId"::equals));
     }
 
     @Test
@@ -161,7 +162,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No csv data found".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("No csv data found"::equals));
     }
 
     @Test
@@ -181,7 +182,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No subject found".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("No subject found"::equals));
     }
 
     @Test
@@ -202,7 +203,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No body found".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("No body found"::equals));
     }
 
     @Test
@@ -224,7 +225,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No initiated by user found".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("No initiated by user found"::equals));
     }
 
     @Test
@@ -248,7 +249,7 @@ public class NotificationMessageHandlerTest {
         notificationMessageHandler.validateJob(jobResult);
 
         Assertions.assertNull(jobResult.getJob());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user not found in canvas".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Initiated by user not found in canvas"::equals));
     }
 
     @Test
@@ -278,7 +279,7 @@ public class NotificationMessageHandlerTest {
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user is not an authorized user".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Initiated by user is not an authorized user"::equals));
     }
 
     @Test
@@ -310,7 +311,7 @@ public class NotificationMessageHandlerTest {
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Initiated by user is not an authorized user".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Initiated by user is not an authorized user"::equals));
     }
 
     @Test
@@ -348,7 +349,7 @@ public class NotificationMessageHandlerTest {
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "No sender canvas id found".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("No sender canvas id found"::equals));
     }
 
     @Test
@@ -388,7 +389,7 @@ public class NotificationMessageHandlerTest {
 
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user not found in canvas".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Sender user not found in canvas"::equals));
     }
 
     @Test
@@ -435,7 +436,7 @@ public class NotificationMessageHandlerTest {
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
         Assertions.assertNotNull(jobResult.getCanvasSenderUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user is not an authorized sending user".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Sender user is not an authorized sending user"::equals));
     }
 
     @Test
@@ -475,9 +476,6 @@ public class NotificationMessageHandlerTest {
         toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
         notifierInitiatedByUser.setToolPermissions(toolPermissionMap);
 
-        AuthorizedUser notifierSenderUser = new AuthorizedUser();
-        notifierSenderUser.setActive(true);
-
         Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierInitiatedByUser);
         Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(null);
 
@@ -486,7 +484,7 @@ public class NotificationMessageHandlerTest {
         Assertions.assertNull(jobResult.getJob());
         Assertions.assertNotNull(jobResult.getCanvasInitiatingUser());
         Assertions.assertNotNull(jobResult.getCanvasSenderUser());
-        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch(em -> "Sender user is not an authorized sending user".equals(em)));
+        Assertions.assertTrue(jobResult.getErrorMessages().stream().anyMatch("Sender user is not an authorized sending user"::equals));
     }
 
     @Test

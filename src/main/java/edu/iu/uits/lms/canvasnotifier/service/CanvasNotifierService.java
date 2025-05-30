@@ -63,18 +63,18 @@ public class CanvasNotifierService {
      * @return True if the sender user was de-elevated. False if not.
      */
     public boolean deElevateSenderUser(Job job) {
-        if (job == null || job.getSender_canvasid() == null || job.getSender_canvasid().trim().length() == 0) {
+        if (job == null || job.getSender_canvasid() == null || job.getSender_canvasid().trim().isEmpty()) {
             return false;
         } else {
             final String senderCanvasId = job.getSender_canvasid();
 
-            if (! accountService.isAccountAdmin(canvasService.getRootAccount(), String.valueOf(job.getSender_canvasid()))) {
+            if (! accountService.isAccountAdmin(canvasService.getRootAccount(), job.getSender_canvasid())) {
                 return true;
             }
 
             List<Job> runningJobs = jobRepository.getRunningJobsBySenderCanvasId(senderCanvasId);
 
-            if (runningJobs == null || runningJobs.size() == 0 &&
+            if (runningJobs == null || runningJobs.isEmpty() &&
                     accountService.revokeAsAccountAdmin(canvasService.getRootAccount(), senderCanvasId)) {
                 return true;
             } else {

@@ -102,8 +102,8 @@ public class CanvasNotifierController extends OidcTokenAwareController {
     @RequestMapping(value = "/preview", method = RequestMethod.POST)
     @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
     public String preview(Model model, @ModelAttribute CanvasNotifierFormModel canvasNotifierFormModel) throws Exception {
-        canvasNotifierFormModel.setGlobalErrorsList(new ArrayList<String>());
-        canvasNotifierFormModel.setFieldErrorsMap(new HashMap<String, Boolean>());
+        canvasNotifierFormModel.setGlobalErrorsList(new ArrayList<>());
+        canvasNotifierFormModel.setFieldErrorsMap(new HashMap<>());
         canvasNotifierFormModel.setSuccessfullySubmitted(false);
         canvasNotifierFormModel.setCnAttachmentText(null);
 
@@ -141,7 +141,7 @@ public class CanvasNotifierController extends OidcTokenAwareController {
 
             // check for duplicate header column names
             Map<String, String> duplicateHeaderNameValue = new HashMap<>();
-            String[] headerLine = rawContents.get(0);
+            String[] headerLine = rawContents.getFirst();
 
             for (String header : headerLine) {
                 if (duplicateHeaderNameValue.containsKey(header.toLowerCase())) {

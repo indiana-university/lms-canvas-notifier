@@ -42,7 +42,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
@@ -79,20 +78,16 @@ public class SecurityConfig {
         http.securityMatcher(WELL_KNOWN_ALL, "/error", "/app/**")
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(WELL_KNOWN_ALL, "/error").permitAll()
-                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY))
+                        .requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
+                                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/**").hasAuthority(BASE_USER_AUTHORITY)
+                )
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com"))
                         .referrerPolicy(referrer -> referrer
                                 .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
                 );
         return http.build();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        // ignore everything except paths specified
-        return web -> web.ignoring().requestMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**",
-                "/app/js/**", "/app/font/**", "/app/images/**", "/favicon.ico");
     }
 
     @Autowired

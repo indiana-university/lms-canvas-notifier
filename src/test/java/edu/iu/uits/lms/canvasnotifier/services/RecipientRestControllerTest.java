@@ -35,53 +35,62 @@ package edu.iu.uits.lms.canvasnotifier.services;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
 import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.Recipient;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.rest.RecipientRestController;
+import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.config.TestUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.View;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@WebMvcTest(controllers = RecipientRestController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
+@ContextConfiguration(classes = {ApplicationConfig.class, RecipientRestController.class})
 @Slf4j
 public class RecipientRestControllerTest {
     @Autowired
-    @InjectMocks
     private RecipientRestController recipientRestController;
 
-    @Autowired
-    @Mock
+    @MockitoBean
     private RecipientRepository recipientRepository;
 
+    @Autowired
     private MockMvc mockMvc;
-
-    @Mock
-    private View view;
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(recipientRestController)
-                .setSingleView(view)
-                .build();
+        Map<String, Object> extraAttributes = new HashMap<>();
+
+        JSONObject customMap = new JSONObject();
+        customMap.put(LTIConstants.CUSTOM_CANVAS_USER_LOGIN_ID_KEY, "user1");
+
+        OidcAuthenticationToken token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
+                extraAttributes, customMap);
+
+        SecurityContextHolder.getContext().setAuthentication(token);
     }
 
     @Test
@@ -94,7 +103,7 @@ public class RecipientRestControllerTest {
         Mockito.when(recipientRepository.findById(recipient1.getId())).thenReturn(java.util.Optional.of(recipient1));
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/recipient/1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -133,7 +142,7 @@ public class RecipientRestControllerTest {
         Mockito.when(recipientRepository.findByJob(job.getId())).thenReturn(allRecipientsList);
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/recipient/job/999")
-                .contentType(MediaType.APPLICATION_JSON_UTF8));
+                .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 

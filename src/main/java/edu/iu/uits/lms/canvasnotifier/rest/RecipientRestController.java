@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/rest/recipient"})
-//@LmsSwaggerDocumentation
 public class RecipientRestController {
 
     @Autowired

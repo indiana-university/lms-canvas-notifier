@@ -89,15 +89,15 @@ public class CanvasNotifierExpireElevationsService {
          }
       }
 
-      String resultsMessage = String.format("De-elevated %s Jobs", jobs == null || jobs.size() == 0
+      String resultsMessage = String.format("De-elevated %s Jobs", jobs == null || jobs.isEmpty()
                                                                    ? "no" : jobs.size());
 
-      if (deElevatedJobIds.size() > 0 || failedDeElevatedJobIds.size() > 0) {
-         if (deElevatedJobIds.size() > 0) {
+      if (!deElevatedJobIds.isEmpty() || !failedDeElevatedJobIds.isEmpty()) {
+         if (!deElevatedJobIds.isEmpty()) {
             resultsMessage += String.format(" with IDs %s", String.join(",", deElevatedJobIds));
          }
 
-         if (failedDeElevatedJobIds.size() > 0) {
+         if (!failedDeElevatedJobIds.isEmpty()) {
             resultsMessage += String.format(". Failed to de-elevate jobs with IDs %s.",
                     String.join(",", failedDeElevatedJobIds));
          }

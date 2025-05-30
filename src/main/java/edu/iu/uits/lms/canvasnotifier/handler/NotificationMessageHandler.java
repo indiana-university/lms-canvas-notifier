@@ -71,6 +71,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -144,7 +145,7 @@ public class NotificationMessageHandler {
 
         List<String> recipientsListForCanvasData = getRecipientsListForCanvasData(csvContents);
 
-        Map<String, String> usernameToCanvasidMap = null;
+        Map<String, String> usernameToCanvasidMap = new HashMap<>();
 
         log.info("Fetching canvas data for " + recipientsListForCanvasData.size() + " usernames");
 
@@ -156,7 +157,7 @@ public class NotificationMessageHandler {
             log.error("uh oh", e);
         }
 
-        log.info("Fetched " + usernameToCanvasidMap.size() + " canvas ids from canvas data");
+        log.info("Fetched {} canvas ids from canvas data", usernameToCanvasidMap.size());
 
         // this is so in case the sending user was already an admin, after the job we don't de-elevate them
         boolean wasAccountAdminBeforeJobRun = accountService.isAccountAdmin(canvasService.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
@@ -212,7 +213,7 @@ public class NotificationMessageHandler {
                 jobResult.addErrorMessage("Job aborted");
                 saveJob(jobResult);
                 emailIfReady(jobResult);
-                log.info("*** ABORTED Job #" + jobResult.getJob().getId());
+                log.info("*** ABORTED Job #{}", jobResult.getJob().getId());
 
                 if (! wasAccountAdminBeforeJobRun) {
                     accountService.revokeAsAccountAdmin(canvasService.getRootAccount(), String.valueOf(jobResult.getCanvasSenderUser().getId()));
@@ -304,7 +305,7 @@ public class NotificationMessageHandler {
                 saveJob(jobResult);
 
             } else { // everything went well - record processed successfully
-                log.info(index + " / " + totalRecordsForDisplay + " - Successfully processed username " + canvasRecipientUsername);
+                log.info("{} / {} - Successfully processed username {}", index, totalRecordsForDisplay, canvasRecipientUsername);
                 jobResult.getProcessCounts().incrementSuccessCount();
 
                 Recipient newRecipient = new Recipient(canvasRecipientUsername, canvasRecipientUserId);
@@ -319,7 +320,7 @@ public class NotificationMessageHandler {
         jobResult.getJob().completeJob();
         saveJob(jobResult);
 
-        log.debug("processing job #" + jobResult.getJob().getId() + " done.");
+        log.debug("processing job #{} done.", jobResult.getJob().getId());
 
         // since finish date is set, this will for sure email out a full summary
         emailIfReady(jobResult);
@@ -359,7 +360,7 @@ public class NotificationMessageHandler {
             String errorMessage = "Can't find jobId";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -367,7 +368,7 @@ public class NotificationMessageHandler {
             String errorMessage = "No csv data found";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -375,7 +376,7 @@ public class NotificationMessageHandler {
             String errorMessage = "No subject found";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -383,7 +384,7 @@ public class NotificationMessageHandler {
             String errorMessage = "No body found";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -391,7 +392,7 @@ public class NotificationMessageHandler {
             String errorMessage = "No initiated by user found";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -401,7 +402,7 @@ public class NotificationMessageHandler {
             String errorMessage = "Initiated by user not found in canvas";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -413,7 +414,7 @@ public class NotificationMessageHandler {
             String errorMessage = "Initiated by user is not an authorized user";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -421,7 +422,7 @@ public class NotificationMessageHandler {
             String errorMessage = "No sender canvas id found";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -431,7 +432,7 @@ public class NotificationMessageHandler {
             String errorMessage = "Sender user not found in canvas";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -443,7 +444,7 @@ public class NotificationMessageHandler {
             String errorMessage = "Sender user is not an authorized sending user";
 
             jobResult.addErrorMessage(errorMessage);
-            log.error("jobId: " + jobId + " - " + errorMessage);
+            log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
 
@@ -478,21 +479,11 @@ public class NotificationMessageHandler {
         // this is part of the validation job process. One would expect this to normally
         // return false here as no errors have been processed so far in validating the job
         // before job processing
-        if (! JobStatus.FINISHED.equals(jobResult.getJob().getStatus()) && jobResult.getErrorMessages().size() == 0) {
+        if (! JobStatus.FINISHED.equals(jobResult.getJob().getStatus()) && jobResult.getErrorMessages().isEmpty()) {
             return false;
         }
 
-        StringBuilder subjectTitleStringBuilder = new StringBuilder();
-        subjectTitleStringBuilder.append("Canvas Notifier - ");
-
-        StringBuilder finalSubjectStringBuilder = new StringBuilder();
-        finalSubjectStringBuilder.append(emailService.getStandardHeader());
-        finalSubjectStringBuilder.append(" - ");
-        finalSubjectStringBuilder.append(subjectTitleStringBuilder);
-        finalSubjectStringBuilder.append(" - ");
-        finalSubjectStringBuilder.append("job #");
-        finalSubjectStringBuilder.append(jobResult.getJobId());
-        finalSubjectStringBuilder.append("\r\n");
+        String finalSubject = emailService.getStandardHeader() + " Canvas Notifier - job #" + jobResult.getJobId();
 
         StringBuilder errorStringBuilder = new StringBuilder();
 
@@ -551,7 +542,7 @@ public class NotificationMessageHandler {
         String[] emailAddresses = ArrayUtils.add(toolConfig.getBatchNotificationEmail(), jobResult.getCanvasInitiatingUser().getEmail());
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setRecipients(emailAddresses);
-        emailDetails.setSubject(finalSubjectStringBuilder.toString());
+        emailDetails.setSubject(finalSubject);
         emailDetails.setBody(errorStringBuilder.toString());
 
         try {
@@ -563,10 +554,10 @@ public class NotificationMessageHandler {
 
         log.debug("----- EMAIL: ");
         for (String emailAddress : emailAddresses) {
-            log.debug("TO: " + emailAddress);
+            log.debug("TO: {}", emailAddress);
         }
 
-        log.debug(finalSubjectStringBuilder.toString());
+        log.debug(finalSubject);
         log.debug(errorStringBuilder.toString());
 
         // send conversation
@@ -598,12 +589,12 @@ public class NotificationMessageHandler {
         canvasUserId = usernameToCanvasidMap.get(username);
 
         if (canvasUserId == null) {
-            log.debug(username + " cannot find in canvas data. Trying instructure canvas lookup...");
+            log.debug("{} cannot find in canvas data. Trying instructure canvas lookup...", username);
 
             User user = userService.getUserBySisLoginId(username);
 
             if (user != null) {
-                log.debug(username + " found in instructure canvas lookup");
+                log.debug("{} found in instructure canvas lookup", username);
                 canvasUserId = user.getId();
             }
 
@@ -616,7 +607,7 @@ public class NotificationMessageHandler {
      * This is used to bypass the hibernate cache.  In case a REST endpoint or db update
      * actually wants this job to abort. Hibernate cache wouldn't see this change so
      * we use raw jdbc to bypass it
-     * @param jobId
+     * @param jobId job id
      * @return whether job in the database is set to abort
      */
     private boolean isAbortJob(@NonNull Long jobId) throws SQLException {
@@ -707,7 +698,7 @@ public class NotificationMessageHandler {
             } else {
                 jobResult.getProcessCounts().incrementFailureCount();
 
-                if (recipient.getError() != null && recipient.getError().trim().length() > 0) {
+                if (recipient.getError() != null && !recipient.getError().trim().isEmpty()) {
                     jobResult.addErrorMessage(recipient.getError());
                 }
             }
