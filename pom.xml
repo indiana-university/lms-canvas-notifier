@@ -62,7 +62,7 @@
         <java.version>21</java.version>
         <jquery.version>3.7.1</jquery.version>
         <lms-canvas-rivet.version>6.2.9.0</lms-canvas-rivet.version>
-        <lms-embedded-services.version>6.2.4</lms-embedded-services.version>
+        <lms-embedded-services.version>6.2.5</lms-embedded-services.version>
         <lms-team-spring-boot-it12>6.5.1_1</lms-team-spring-boot-it12>
         <opencsv.version>5.11</opencsv.version>
         <spring-cloud-dependencies.version>2024.0.1</spring-cloud-dependencies.version>
