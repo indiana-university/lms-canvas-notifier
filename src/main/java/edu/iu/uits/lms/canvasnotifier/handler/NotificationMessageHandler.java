@@ -54,7 +54,7 @@ import edu.iu.uits.lms.common.date.DateFormatUtil;
 import edu.iu.uits.lms.email.model.EmailDetails;
 import edu.iu.uits.lms.email.service.EmailService;
 import edu.iu.uits.lms.iuonly.model.ListWrapper;
-import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.NonNull;
@@ -408,9 +408,7 @@ public class NotificationMessageHandler {
 
         jobResult.setCanvasInitiatingUser(canvasInitiatingUser);
 
-        AuthorizedUser notifierInitiatedUser = authorizedUserService.findByActiveUsernameAndToolPermission(job.getInitited_by_username(), Constants.AUTH_USER_TOOL_PERMISSION);
-
-        if (notifierInitiatedUser == null) {
+        if (!authorizedUserService.isAuthorized(job.getInitited_by_username(), Constants.AUTH_USER_TOOL_PERMISSION)) {
             String errorMessage = "Initiated by user is not an authorized user";
 
             jobResult.addErrorMessage(errorMessage);
@@ -438,15 +436,14 @@ public class NotificationMessageHandler {
 
         jobResult.setCanvasSenderUser(canvasSenderUser);
 
-        AuthorizedUser notifierSenderUser = authorizedUserService.findByActiveUsernameAndToolPermission(canvasSenderUser.getLoginId(), Constants.AUTH_SENDER_TOOL_PERMISSION);
-
-        if (notifierSenderUser == null) {
+        if (!authorizedUserService.isAuthorized(canvasSenderUser.getLoginId(), Constants.AUTH_SENDER_TOOL_PERMISSION)) {
             String errorMessage = "Sender user is not an authorized sending user";
 
             jobResult.addErrorMessage(errorMessage);
             log.error("jobId: {} - {}", jobId, errorMessage);
             return;
         }
+        AuthUser notifierSenderUser = authorizedUserService.findByUsername(canvasSenderUser.getLoginId());
 
         jobResult.setSenderDisplayName(notifierSenderUser.getDisplayName());
         jobResult.setJob(job);

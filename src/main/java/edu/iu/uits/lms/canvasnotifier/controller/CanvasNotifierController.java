@@ -43,7 +43,7 @@ import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.model.form.CanvasNotifierFormModel;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
-import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
@@ -66,6 +66,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/app")
@@ -84,10 +85,14 @@ public class CanvasNotifierController extends OidcTokenAwareController {
     @Secured(LTIConstants.INSTRUCTOR_AUTHORITY)
     public String main(Model model, CanvasNotifierFormModel canvasNotifierFormModel) {
 
-        List<AuthorizedUser> userList = new ArrayList<>(authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION));
-        userList.sort(Comparator.comparing(AuthorizedUser::getDisplayName, String.CASE_INSENSITIVE_ORDER));
+        List<AuthUser> userData = authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION);
 
-        AuthorizedUser pickOptionDummyUser = new AuthorizedUser();
+        List<AuthUser> userList = userData.stream()
+                .filter(u -> u.getCanvasUserId() != null)
+                .sorted(Comparator.comparing(AuthUser::getDisplayName, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+
+        AuthUser pickOptionDummyUser = new AuthUser();
         pickOptionDummyUser.setId(-1L);
         pickOptionDummyUser.setDisplayName("Choose a username...");
         userList.addFirst(pickOptionDummyUser);
@@ -111,9 +116,11 @@ public class CanvasNotifierController extends OidcTokenAwareController {
                 canvasNotifierFormModel.getSelectedSenderCanvasId().isEmpty() || canvasNotifierFormModel.getSelectedSenderCanvasId().equals("-1")) {
             canvasNotifierFormModel.getFieldErrorsMap().put("sender", true);
         } else {
-            canvasNotifierFormModel.setSelectedSenderDisplayName(authorizedUserService
-                    .findByActiveCanvasUserIdAndToolPermission(canvasNotifierFormModel.getSelectedSenderCanvasId(), Constants.AUTH_SENDER_TOOL_PERMISSION)
-                    .getDisplayName());
+            boolean isAuthSender = authorizedUserService.isAuthorizedByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId(), Constants.AUTH_SENDER_TOOL_PERMISSION);
+            if (isAuthSender) {
+                AuthUser authSender = authorizedUserService.findByCanvasUserId(canvasNotifierFormModel.getSelectedSenderCanvasId());
+                canvasNotifierFormModel.setSelectedSenderDisplayName(authSender.getDisplayName());
+            }
         }
 
         if (canvasNotifierFormModel.getSubject() == null || canvasNotifierFormModel.getSubject().isEmpty()) {
