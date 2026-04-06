@@ -41,6 +41,7 @@ import edu.iu.uits.lms.common.server.GitRepositoryState;
 import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.server.ServerUtils;
 import edu.iu.uits.lms.email.config.EnableEmailClient;
+import edu.iu.uits.lms.errorcontact.config.EnableErrorContactClient;
 import edu.iu.uits.lms.iuonly.config.EnableIuOnlyClient;
 import edu.iu.uits.lms.lti.config.EnableGlobalErrorHandler;
 import edu.iu.uits.lms.lti.config.EnableLtiClient;
@@ -66,6 +67,7 @@ import java.util.Date;
 @EnableCanvasClient
 @EnableConfigurationProperties(GitRepositoryState.class)
 @EnableIuOnlyClient
+@EnableErrorContactClient
 @EnableEmailClient
 public class WebApplication {
 

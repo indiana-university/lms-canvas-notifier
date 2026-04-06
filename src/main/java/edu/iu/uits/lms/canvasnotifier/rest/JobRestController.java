@@ -40,7 +40,6 @@ import edu.iu.uits.lms.canvasnotifier.model.Job;
 import edu.iu.uits.lms.canvasnotifier.model.JobStatus;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.util.CanvasNotifierUtils;
-import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -193,9 +192,7 @@ public class JobRestController {
             return new NotifierJobRestMessage("No canvas sender user id provided", null);
         }
 
-        AuthorizedUser user = authorizedUserService.findByActiveCanvasUserIdAndToolPermission(canvasSenderUserId.toString(), Constants.AUTH_SENDER_TOOL_PERMISSION);
-
-        if (user == null) {
+        if (!authorizedUserService.isAuthorizedByCanvasUserId(canvasSenderUserId.toString(), Constants.AUTH_SENDER_TOOL_PERMISSION)) {
             return new NotifierJobRestMessage(String.format("Provided canvas sender user %d is not an authorized sender",
                     canvasSenderUserId), null);
         }

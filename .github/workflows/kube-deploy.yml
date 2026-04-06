@@ -55,18 +55,18 @@ jobs:
     name: Maven Build
     runs-on: self-hosted
     container:
-      image: maven:3.9.9-eclipse-temurin-21
+      image: maven:3.9.14-eclipse-temurin-25
     environment: ${{ github.event.inputs.server_env }}
     steps:
       - name: Clone GitHub root repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: iu-uits-es/ess-lms-canvas-standalone-apps
           ref: ${{ github.event.inputs.helm_deployer_branch }}
           token: ${{ secrets.LMS_GH_TOKEN }}
           github-server-url: https://github.iu.edu
       - name: Clone GitHub tool repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: tools/${{ vars.DEPLOY_DIR }}
       - name: mvn setup
@@ -98,7 +98,7 @@ jobs:
         password: ${{ secrets.LMS_REGISTRY_PASSWORD }}
     steps:
       - name: Clone GitHub repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: iu-uits-es/ess-lms-canvas-standalone-apps
           ref: ${{ github.event.inputs.helm_deployer_branch }}
