@@ -48,8 +48,7 @@ import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.canvasnotifier.repository.RecipientRepository;
 import edu.iu.uits.lms.canvasnotifier.service.CanvasNotifierService;
 import edu.iu.uits.lms.email.service.EmailService;
-import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
-import edu.iu.uits.lms.iuonly.model.acl.ToolPermission;
+import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.CanvasDataServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -63,9 +62,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @SpringBootTest(classes = {NotificationMessageHandler.class, CanvasNotifierService.class, ApplicationConfig.class},
         properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
@@ -305,7 +302,7 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(canvasUser);
 
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(null);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(false);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -337,13 +334,7 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(canvasUser);
 
-        AuthorizedUser notifierUser = new AuthorizedUser();
-        notifierUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
-        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
-        notifierUser.setToolPermissions(toolPermissionMap);
-
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(true);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -377,13 +368,7 @@ public class NotificationMessageHandlerTest {
 
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
 
-        AuthorizedUser notifierUser = new AuthorizedUser();
-        notifierUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
-        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
-        notifierUser.setToolPermissions(toolPermissionMap);
-
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(true);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -423,13 +408,7 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        AuthorizedUser notifierUser = new AuthorizedUser();
-        notifierUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
-        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
-        notifierUser.setToolPermissions(toolPermissionMap);
-
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierUser);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(true);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -470,14 +449,8 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        AuthorizedUser notifierInitiatedByUser = new AuthorizedUser();
-        notifierInitiatedByUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
-        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
-        notifierInitiatedByUser.setToolPermissions(toolPermissionMap);
-
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierInitiatedByUser);
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(null);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(true);
+        Mockito.when(authorizedUserService.isAuthorized(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(false);
 
         notificationMessageHandler.validateJob(jobResult);
 
@@ -518,20 +491,12 @@ public class NotificationMessageHandlerTest {
         Mockito.when(usersApi.getUserBySisLoginId(initiatedByUsername)).thenReturn(initiatedByCanvasUser);
         Mockito.when(usersApi.getUserByCanvasId(sendCanvasId)).thenReturn(senderUser);
 
-        AuthorizedUser notifierInitiatedByUser = new AuthorizedUser();
-        notifierInitiatedByUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap = new HashMap<>();
-        toolPermissionMap.put(Constants.AUTH_USER_TOOL_PERMISSION, new ToolPermission());
-        notifierInitiatedByUser.setToolPermissions(toolPermissionMap);
-
-        AuthorizedUser notifierSenderUser = new AuthorizedUser();
+        AuthUser notifierSenderUser = new AuthUser();
         notifierSenderUser.setActive(true);
-        Map<String, ToolPermission> toolPermissionMap2 = new HashMap<>();
-        toolPermissionMap2.put(Constants.AUTH_SENDER_TOOL_PERMISSION, new ToolPermission());
-        notifierSenderUser.setToolPermissions(toolPermissionMap2);
 
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(notifierInitiatedByUser);
-        Mockito.when(authorizedUserService.findByActiveUsernameAndToolPermission(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(notifierSenderUser);
+        Mockito.when(authorizedUserService.isAuthorized(initiatedByUsername, Constants.AUTH_USER_TOOL_PERMISSION)).thenReturn(true);
+        Mockito.when(authorizedUserService.isAuthorized(sendUsername, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(true);
+        Mockito.when(authorizedUserService.findByUsername(sendUsername)).thenReturn(notifierSenderUser);
 
         notificationMessageHandler.validateJob(jobResult);
 
