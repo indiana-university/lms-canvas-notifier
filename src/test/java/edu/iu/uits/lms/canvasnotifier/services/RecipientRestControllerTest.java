@@ -49,9 +49,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -67,10 +68,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+
 @WebMvcTest(controllers = RecipientRestController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
-@ContextConfiguration(classes = {ApplicationConfig.class, RecipientRestController.class})
+@ContextConfiguration(classes = {ApplicationConfig.class, RecipientRestController.class, RecipientRestControllerTest.TestSecurityConfig.class})
 @Slf4j
 public class RecipientRestControllerTest {
+
+    @TestConfiguration
+    @EnableWebSecurity
+    static class TestSecurityConfig {
+    }
+
     @Autowired
     private RecipientRestController recipientRestController;
 
@@ -80,6 +89,8 @@ public class RecipientRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private OidcAuthenticationToken token;
+
     @BeforeEach
     public void setup() {
         Map<String, Object> extraAttributes = new HashMap<>();
@@ -87,10 +98,8 @@ public class RecipientRestControllerTest {
         JSONObject customMap = new JSONObject();
         customMap.put(LTIConstants.CUSTOM_CANVAS_USER_LOGIN_ID_KEY, "user1");
 
-        OidcAuthenticationToken token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
+        token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
                 extraAttributes, customMap);
-
-        SecurityContextHolder.getContext().setAuthentication(token);
     }
 
     @Test
@@ -103,6 +112,7 @@ public class RecipientRestControllerTest {
         Mockito.when(recipientRepository.findById(recipient1.getId())).thenReturn(java.util.Optional.of(recipient1));
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/recipient/1")
+                .with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
@@ -142,6 +152,7 @@ public class RecipientRestControllerTest {
         Mockito.when(recipientRepository.findByJob(job.getId())).thenReturn(allRecipientsList);
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/recipient/job/999")
+                .with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());

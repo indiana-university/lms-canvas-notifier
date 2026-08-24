@@ -1,23 +1,11 @@
 spring:
   application:
     name: canvasnotifier
-  session:
-    store-type: none
-  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:email.properties, classpath:lti-registrations.properties, optional:classpath:denodo.properties,optional:classpath:derdack.properties,
+  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:email.properties, classpath:lti-registrations.properties, optional:classpath:denodo.properties,optional:classpath:derdack.properties
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        boot:
-          allow_jdbc_metadata_access: false
-      jadira:
-        usertype:
-          autoRegisterUserTypes: true
   datasource:
     url: ${lms.db.url}
     username: ${lms.db.user}
@@ -34,6 +22,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
+  web.error.whitelabel.enabled: false
   rabbitmq:
     addresses: ${lms.rabbitmq.address.${app.env}}
     username: ${lms.rabbitmq.username.${app.env}}
@@ -45,7 +34,7 @@ spring:
       retry:
         enabled: true
         initial-interval: 3s
-        max-attempts: 3
+        max-retries: 3
         max-interval: 10s
         multiplier: 2
 canvasnotifier:
@@ -54,9 +43,6 @@ canvasnotifier:
   batchNotificationEmail: iu-uits-es-ess-lms-notify@exchange.iu.edu,lms-func-l@iu.edu
   canvasNotifierQueueName: notifier_${lms.rabbitmq.queue_env_suffix}
 server:
-  error:
-    whitelabel:
-      enabled: false
   servlet:
     session:
       timeout: 30m
@@ -77,8 +63,9 @@ management:
 spring:
   config.activate.on-profile: redis-session
   session:
-    store-type: redis
-    redis.namespace: canvasnotifier-@app.version@:session
+    data:
+      redis:
+        namespace: canvasnotifier-@app.version@:session
 management.health.redis.enabled: true
 
 ---
