@@ -36,6 +36,7 @@ package edu.iu.uits.lms.canvasnotifier.services;
 import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
 import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
+import edu.iu.uits.lms.canvasnotifier.config.SecurityConfig;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.common.server.ServerInfo;
@@ -43,15 +44,15 @@ import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.TestUtils;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -71,14 +72,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
 @WebMvcTest(controllers = CanvasNotifierController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
-@ContextConfiguration(classes = {ApplicationConfig.class, CanvasNotifierController.class, CanvasNotifierControllerTest.TestSecurityConfig.class})
+@ContextConfiguration(classes = {ApplicationConfig.class, CanvasNotifierController.class, SecurityConfig.class})
 @Slf4j
 public class CanvasNotifierControllerTest {
-
-    @TestConfiguration
-    @EnableWebSecurity
-    static class TestSecurityConfig {
-    }
 
     @Autowired
     private CanvasNotifierController canvasNotifierController;
@@ -88,6 +84,12 @@ public class CanvasNotifierControllerTest {
 
     @MockitoBean
     private AuthorizedUserService authorizedUserService;
+
+    @MockitoBean
+    private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+    @MockitoBean
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     @MockitoBean
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
