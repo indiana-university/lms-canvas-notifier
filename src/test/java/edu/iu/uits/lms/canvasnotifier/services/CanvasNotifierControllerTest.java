@@ -36,6 +36,7 @@ package edu.iu.uits.lms.canvasnotifier.services;
 import edu.iu.uits.lms.canvasnotifier.Constants;
 import edu.iu.uits.lms.canvasnotifier.amqp.CanvasNotifierMessageSender;
 import edu.iu.uits.lms.canvasnotifier.config.ApplicationConfig;
+import edu.iu.uits.lms.canvasnotifier.config.SecurityConfig;
 import edu.iu.uits.lms.canvasnotifier.controller.CanvasNotifierController;
 import edu.iu.uits.lms.canvasnotifier.repository.JobRepository;
 import edu.iu.uits.lms.common.server.ServerInfo;
@@ -43,14 +44,15 @@ import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.TestUtils;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -67,9 +69,10 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
 @WebMvcTest(controllers = CanvasNotifierController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
-@ContextConfiguration(classes = {ApplicationConfig.class, CanvasNotifierController.class})
+@ContextConfiguration(classes = {ApplicationConfig.class, CanvasNotifierController.class, SecurityConfig.class})
 @Slf4j
 public class CanvasNotifierControllerTest {
 
@@ -81,6 +84,12 @@ public class CanvasNotifierControllerTest {
 
     @MockitoBean
     private AuthorizedUserService authorizedUserService;
+
+    @MockitoBean
+    private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+    @MockitoBean
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     @MockitoBean
     private CanvasNotifierMessageSender canvasNotifierMessageSender;
@@ -95,10 +104,11 @@ public class CanvasNotifierControllerTest {
 
     private enum Method { GET, POST }
 
+    private OidcAuthenticationToken token;
+
     @BeforeEach
     public void setup() {
-        OidcAuthenticationToken token = TestUtils.buildToken("userId", ID, LTIConstants.INSTRUCTOR_AUTHORITY);
-        SecurityContextHolder.getContext().setAuthentication(token);
+        token = TestUtils.buildToken("userId", ID, LTIConstants.INSTRUCTOR_AUTHORITY);
 
         Mockito.reset(authorizedUserService);
     }
@@ -108,10 +118,10 @@ public class CanvasNotifierControllerTest {
 
         switch (method) {
             case GET:
-                mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/app/" + page, ID));
+                mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/app/" + page, ID).with(authentication(token)));
                 break;
             case POST:
-                mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.post("/app/" + page, ID));
+                mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.post("/app/" + page, ID).with(authentication(token)));
                 break;
             default:
                 throw new RuntimeException();
@@ -159,7 +169,7 @@ public class CanvasNotifierControllerTest {
         Mockito.when(authorizedUserService.isAuthorizedByCanvasUserId(username2, Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(true);
         Mockito.when(authorizedUserService.findActiveUsersByPermission(Constants.AUTH_SENDER_TOOL_PERMISSION)).thenReturn(userRepositoryResultList);
 
-        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/app/main", ID));
+        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/app/main", ID).with(authentication(token)));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
 

@@ -51,9 +51,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -70,12 +71,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(controllers = JobRestController.class, properties = {"oauth.tokenprovider.url=http://foo", "logging.level.org.springframework.security=DEBUG"})
-@ContextConfiguration(classes = {ApplicationConfig.class, JobRestController.class})
+@ContextConfiguration(classes = {ApplicationConfig.class, JobRestController.class, JobRestControllerTest.TestSecurityConfig.class})
 @Slf4j
 public class JobRestControllerTest {
+
+    @TestConfiguration
+    @EnableWebSecurity
+    static class TestSecurityConfig {
+    }
+
     @Autowired
     private JobRestController jobRestController;
 
@@ -91,6 +99,8 @@ public class JobRestControllerTest {
     @MockitoBean
     private AuthorizedUserService authorizedUserService;
 
+    private OidcAuthenticationToken token;
+
     @BeforeEach
     public void setup() {
         Map<String, Object> extraAttributes = new HashMap<>();
@@ -98,10 +108,8 @@ public class JobRestControllerTest {
         JSONObject customMap = new JSONObject();
         customMap.put(LTIConstants.CUSTOM_CANVAS_USER_LOGIN_ID_KEY, "user1");
 
-        OidcAuthenticationToken token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
+        token = TestUtils.buildToken("userId", LTIConstants.INSTRUCTOR_AUTHORITY,
                 extraAttributes, customMap);
-
-        SecurityContextHolder.getContext().setAuthentication(token);
     }
 
     @Test
@@ -114,6 +122,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job1.getId())).thenReturn(java.util.Optional.of(job1));
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/job/1")
+                .with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
@@ -148,6 +157,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findAll()).thenReturn(allJobsList);
 
         ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.get("/rest/job/all")
+                .with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
@@ -196,7 +206,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job2.getId())).thenReturn(java.util.Optional.of(job2));
         Mockito.when(jobRepository.findById(job3.getId())).thenReturn(java.util.Optional.of(job3));
 
-        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/abort").with(csrf())
+        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/abort").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
@@ -209,7 +219,7 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job is already aborted", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/abort").with(csrf())
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/abort").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
@@ -220,7 +230,7 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Cannot abort a finished job", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/abort").with(csrf())
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/abort").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
@@ -231,7 +241,7 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job ABORTED", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/4/abort").with(csrf())
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/4/abort").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
@@ -259,7 +269,7 @@ public class JobRestControllerTest {
         Mockito.when(jobRepository.findById(job1.getId())).thenReturn(java.util.Optional.of(job1));
         Mockito.when(jobRepository.findById(job2.getId())).thenReturn(java.util.Optional.of(job2));
 
-        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/restart").with(csrf())
+        ResultActions mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/1/restart").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mockMvcAction.andExpect(MockMvcResultMatchers.status().isOk());
@@ -272,7 +282,7 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job #1 is not in an aborted state", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/restart").with(csrf())
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/2/restart").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
@@ -283,7 +293,7 @@ public class JobRestControllerTest {
 
         Assertions.assertEquals("Job #2 restarted", resultJson);
 
-        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/restart").with(csrf())
+        mockMvcAction = mockMvc.perform(MockMvcRequestBuilders.put("/rest/job/3/restart").with(csrf()).with(authentication(token))
                 .contentType(MediaType.APPLICATION_JSON));
 
         mvcResult = mockMvcAction.andReturn();
