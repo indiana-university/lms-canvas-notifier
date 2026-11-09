@@ -83,7 +83,7 @@
                 </div>
 
                 <div th:if="${senderError}" class="rvt-inline-alert rvt-inline-alert--danger">
-                    <div th:replace="fragments :: field-error('state-message', 'You must choose a sender.')" />
+                    <div th:replace="~{fragments :: field-error('state-message', 'You must choose a sender.')}" />
                 </div>
 
                 <label for="msgSubject" class="cnLabel rvt-m-top-md rvt-label">Message Subject <span th:replace="~{fragments :: reqAsterisk}"></span></label>
@@ -92,7 +92,7 @@
                        th:attr="aria-required='true', aria-describedby=${subjectError} ? 'messageSubject', aria-invalid=${subjectError} ? 'true'" />
 
                 <div th:if="${subjectError}" class="rvt-inline-alert rvt-inline-alert--danger">
-                    <div th:replace="fragments :: field-error('messageSubject', 'You must enter a subject.')" />
+                    <div th:replace="~{fragments :: field-error('messageSubject', 'You must enter a subject.')}" />
                 </div>
 
                 <label for="msgBody" class="cnLabel rvt-m-top-md rvt-label">Message Body <span th:replace="~{fragments :: reqAsterisk}"></span></label>
@@ -101,7 +101,7 @@
                           th:attr="aria-required='true', aria-describedby=${bodyError} ? 'description-message', aria-invalid=${bodyError} ? 'true'"></textarea>
 
                 <div th:if="${bodyError}" class="rvt-inline-alert rvt-inline-alert--danger">
-                    <div th:replace="fragments :: field-error('description-message', 'You must enter a message.')" />
+                    <div th:replace="~{fragments :: field-error('description-message', 'You must enter a message.')}" />
                 </div>
 
                 <p class="recipients">Recipients <span th:replace="~{fragments :: reqAsterisk}"></span></p>
@@ -121,7 +121,7 @@
                 </div>
 
                 <div th:if="${attachError}" class="rvt-inline-alert rvt-inline-alert--danger">
-                    <div th:replace="fragments :: field-error('csvMessage', 'You must select a file.')" />
+                    <div th:replace="~{fragments :: field-error('csvMessage', 'You must select a file.')}" />
                 </div>
 
                 <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-flex rvt-vertical-center">
